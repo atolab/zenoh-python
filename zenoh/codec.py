@@ -137,16 +137,27 @@ def decode_commit_decl(buf, h):
 
 def encode_result_decl(buf, d):
     buf.put(d.h)
+    buf.put(d.commit_id)
     buf.put(d.status)
     if d.id is not None:
         buf.put_vle(d.id)
 
 def decode_result_decl(buf, h):
+    commit_id = buf.get()
     status = buf.get()
     id = None
     if status != 0:
         id = buf.get_vle()
-    return ResultDecl(status, id)
+    return ResultDecl(commit_id, status, id)
+
+def encode_forget_decl(buf, d):
+    buf.put(d.header)
+    buf.put_vle(d.id)
+
+def decode_forget_decl(buf, h):
+    id = buf.get_vle()
+    return ForgetDecl(Header.get_mid(h), id)
+
 
 def encode_declaration(buf, d):
     {
@@ -154,19 +165,26 @@ def encode_declaration(buf, d):
         Declaration.PUBLISHER : lambda d : encode_pub_decl(buf, d),            
         Declaration.SUBSCRIBER : lambda d : encode_sub_decl(buf, d),   
         Declaration.COMMIT : lambda d : encode_commit_decl(buf, d),
-        Declaration.RESULT : lambda d : encode_res_decl (buf, d)
+        Declaration.RESULT : lambda d : encode_res_decl (buf, d),
+        Declaration.FORGET_PUB : lambda d : encode_forget_decl(buf, d),
+        Declaration.FORGET_SUB : lambda d : encode_forget_decl(buf, d),
+        Declaration.FORGET_RES : lambda d : encode_forget_decl(buf, d),
+        Declaration.FORGET_SEL : lambda d : encode_forget_decl(buf, d)
     }.get(d.mid)(d)    
 
 def decode_declaration(buf):
     h = buf.get()
     id = Header.get_mid(h)
-    print('>> Trying to parse declaration with did = {}'.format(id))
     decoder = {
         Declaration.RESOURCE : lambda buf,h : decode_res_decl(buf, h),
         Declaration.PUBLISHER : lambda buf,h: decode_pub_decl(buf, h),            
         Declaration.SUBSCRIBER : lambda buf,h : decode_sub_decl(buf, h),   
         Declaration.COMMIT : lambda buf,h : decode_commit_decl(buf, h),
-        Declaration.RESULT : lambda buf,h : decode_res_decl (buf, h)        
+        Declaration.RESULT : lambda buf,h : decode_res_decl (buf, h),
+        Declaration.FORGET_PUB : lambda buf,h : decode_forget_decl(buf, h),
+        Declaration.FORGET_SUB : lambda buf,h : decode_forget_decl(buf, h),
+        Declaration.FORGET_RES : lambda buf,h : decode_forget_decl(buf, h),
+        Declaration.FORGET_SEL : lambda buf,h : decode_forget_decl(buf, h)        
     }.get(id)  
     decl = None  
     if decoder is not None: 

@@ -212,14 +212,17 @@ class CommitDecl(Declaration):
         self.commit_id = commit_id
 
 class ResultDecl(Declaration):
-    def __init__(self, status, id=None):
-        super(ResultDecl, self).__init__(0, Declaration.RESULT)        
+    def __init__(self, commit_id, status, id=None):
+        super(ResultDecl, self).__init__(0, Declaration.RESULT)
+        self.commit_id = commit_id        
         self.status = status
         self.id = id
 
 class ForgetDecl(Declaration):
     def __init__(self, kind, id):
         super(ForgetDecl, self).__init__(0, kind)
+        self.id = id
+
     @staticmethod
     def res(id):
         return ForgetDecl(Declaration.FORGET_RES, id)
