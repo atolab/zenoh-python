@@ -1,0 +1,13 @@
+# TODO
+
+## Up Next
+- Support Write Data
+- Properly Match Selections
+- Add signal handling for propoer clean-up
+
+## Eventually Should Have
+- Transport support for:
+     - BLE
+     - UDP/IP
+
+## Nice to Have
