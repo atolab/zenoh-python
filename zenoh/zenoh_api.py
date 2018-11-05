@@ -7,6 +7,7 @@ from .codec import *
 import threading
 import logging
 import sys
+import signal
 
 def get_frame_len(sock):
     buf = IOBuf()
@@ -104,10 +105,14 @@ class Zenoh(threading.Thread):
         # fh.setFormatter(formatter)
         # add the handlers to logger
         self.logger.addHandler(ch)
-        # self.logger.addHandler(fh)        
+        # self.logger.addHandler(fh)         
+        signal.signal(signal.SIGINT, self.signal_handler)
         
-        
-        
+    def signal_handler(self,sig, frame):        
+        self.on_close(self)
+        self.running = False
+        self.sock.close()                
+
     def next_rid(self):
         id = self.next_rid_
         self.next_rid_ += 2
@@ -209,17 +214,21 @@ class Zenoh(threading.Thread):
                 Declaration.FORGET_SUB : lambda d : self.handle_forget_sub_decl(d)
             }.get(d.mid, other_case)(d)           
 
-    def run(self):
-        while self.running:        
-            m = recv_msg(self.sock)
-            self.logger.debug('>> Received msg with id: {}'.format(m.mid))
-            default_case = lambda msg : self.handle_other_msg(msg)
-            {
-                Message.SDATA : lambda msg : self.handle_sdata(msg),
-                Message.WDATA : lambda msg : self.handle_wdata(msg),
-                Message.CLOSE : lambda msg : self.handle_close(msg),
-                Message.DECLARE : lambda msg : self.handle_declare(msg)
-            }.get(m.mid, default_case)(m)
+    def run(self):                
+        try:
+            while self.running:                    
+                m = recv_msg(self.sock)
+                self.logger.debug('>> Received msg with id: {}'.format(m.mid))
+                default_case = lambda msg : self.handle_other_msg(msg)
+                {
+                    Message.SDATA : lambda msg : self.handle_sdata(msg),
+                    Message.WDATA : lambda msg : self.handle_wdata(msg),
+                    Message.CLOSE : lambda msg : self.handle_close(msg),
+                    Message.DECLARE : lambda msg : self.handle_declare(msg)
+                }.get(m.mid, default_case)(m)
+        except:
+            e = sys.exc_info()[0]
+            self.logger.debug('Terminating the runloop because of {}'.format(e))
 
     def register_resource(self, rname, rid):    
         if rid is None:

@@ -19,8 +19,10 @@ def run_pub(broker):
     pub = z.declare_publisher('//demo/hello')
     print('Declared Publisher on resource {}:{}'.format(pub.rname, pub.rid))
     pub.observe_matching(matching_observer)
+    count = 0
     while True:
-        pub.write('Hello to the Zenoh World'.encode())
+        pub.write('[{}]: Hello to the Zenoh World'.format(count).encode())
+        count += 1
         time.sleep(1)
 
 if __name__ == '__main__':    
