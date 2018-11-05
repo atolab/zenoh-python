@@ -5,6 +5,8 @@ import time
 ap = argparse.ArgumentParser()
 ap.add_argument("-z", "--zenohd", required=True,
                 help="ip:port for the zenoh broker")
+ap.add_argument("", "--log", required=False,
+                help="Log level (INFO, DEBUG, WARNING, ERROR, CRITICAL)")
 
 args = vars(ap.parse_args())
 

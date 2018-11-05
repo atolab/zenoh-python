@@ -5,6 +5,8 @@ from .message import Open
 from .iobuf import *
 from .codec import *
 import threading
+import logging
+import sys
 
 def get_frame_len(sock):
     buf = IOBuf()
@@ -55,13 +57,24 @@ class Publisher(object):
         self.zenoh.forget_publisher(self.rid)
     
 
-
+def get_log_level():
+    l = logging.ERROR
+    i = 0
+    for a in sys.argv:
+        if a.startswith('--log='):
+            _,_,lvl = a.partition('=')
+            l = getattr(logging, lvl.upper())
+        elif a == '-l':
+            l = getattr(logging, sys.argv[i+1].upper())        
+        i +=1
+    return l            
+    
 class Zenoh(threading.Thread):
     DEFAULT_SCOUT_ADDRESS = "239.255.0.1"
     DEFAULT_PORT = 7447
     DEFAULT_TIMEOUT = 5
     def __init__(self,  sock, client_id, broker_id, locator, on_close):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self)        
         self.pid = None
         self.locator = None 
         self.connected = True
@@ -77,6 +90,23 @@ class Zenoh(threading.Thread):
         self.next_rid_ = 2
         self.next_sid_ = 1
         self.res_map = {}
+        self.logger = logging.getLogger('io.zenoh')
+        self.log_level = get_log_level()
+        self.logger.setLevel(self.log_level)
+        # fh = logging.FileHandler('zenoh-python-{}.log'.format(os.getpid()))
+        # fh.setLevel(logging.DEBUG)
+        # create console handler with a higher log level
+        ch = logging.StreamHandler()
+        ch.setLevel(self.log_level)
+        # create formatter and add it to the handlers
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        # fh.setFormatter(formatter)
+        # add the handlers to logger
+        self.logger.addHandler(ch)
+        # self.logger.addHandler(fh)        
+        
+        
         
     def next_rid(self):
         id = self.next_rid_
@@ -135,7 +165,7 @@ class Zenoh(threading.Thread):
         return z
 
     def handle_other_msg(self, msg):
-        print('>> Received message {} -- ignoring'.format(msg.mid))
+        self.logger.warning(' Received message {} -- ignoring'.format(msg.mid))
     
     def handle_sdata(self, msg):
         cs = self.subs.get(msg.rid, [])     
@@ -143,32 +173,37 @@ class Zenoh(threading.Thread):
             listener(msg.rid, msg.payload)
     
     def handle_wdata(self, msg):
-        print('>> Received message {} -- ignoring'.format(msg.mid))
+        self.logger.warning('>> Received message {} -- ignoring'.format(msg.mid))
         
-    def handle_close(self, msg):        
+    def handle_close(self, msg): 
+        self.logger.debug('>> handle_close')       
         self.on_close(self)
         self.running = False
         socket.close(self.sock)
 
     def handle_result_decl(self, d):
+        self.logger.debug('>> handle_result_decl for cid: {}'.format(d.commit_id))
         cv = self.decls.get(d.commit_id, None)
         if cv != None:
             cv.notify()
 
-    def handle_sub_decl(self, d):
+    def handle_sub_decl(self, d):        
+        self.logger.debug('>> handle_sub_decl for resource: {}'.format(d.rid))
         for s in self.pubs.get(d.rid, []):
             s.set_matching(True)
 
     def handle_forget_sub_decl(self, d):
-        print('Forgetting subscrition for res: {}'.format(d.id))
-        for p in self.pubs.get(d.id, []):
-            print('Changing matching state for pub on res: {}'.format(p.rid))
+        self.logger.debug('>> Forgetting subscrition for resource: {}'.format(d.id))
+        for p in self.pubs.get(d.id, []):            
             p.set_matching(False)
             
+    def handle_ignored_declaration(self, d):
+        self.logger.debug('>> handle_ignored_declaration for declaration {}'.format(d.mid))
+
     def handle_declare(self, msg):
-        other_case = lambda m : m
-        for d in msg.declarations: 
-            {
+        other_case = self.handle_ignored_declaration
+        for d in msg.declarations:             
+            {                
                 Declaration.RESULT : lambda d : self.handle_result_decl(d),
                 Declaration.SUBSCRIBER : lambda d : self.handle_sub_decl(d),
                 Declaration.FORGET_SUB : lambda d : self.handle_forget_sub_decl(d)
@@ -177,6 +212,7 @@ class Zenoh(threading.Thread):
     def run(self):
         while self.running:        
             m = recv_msg(self.sock)
+            self.logger.debug('>> Received msg with id: {}'.format(m.mid))
             default_case = lambda msg : self.handle_other_msg(msg)
             {
                 Message.SDATA : lambda msg : self.handle_sdata(msg),
@@ -185,15 +221,17 @@ class Zenoh(threading.Thread):
                 Message.DECLARE : lambda msg : self.handle_declare(msg)
             }.get(m.mid, default_case)(m)
 
-    def register_resource(self, rname, rid):
+    def register_resource(self, rname, rid):    
         if rid is None:
             rid = self.next_rid()
         self.res_map[rname] = rid
-        return rid
+        self.logger.debug('>> Registered resurce: {} with id: {}'.format(rname, rid))
+        return rid  
 
     def declare_resource(self, rname, rid=None):
         if self.res_map.get(rname) is None:
             r_rid = self.register_resource(rname, rid)        
+            self.logger.debug('>> Declaring resurce: {} with id: {}'.format(rname, r_rid))
             dres = ResourceDecl(r_rid, rname)        
             cid = self.next_commit_id()
             cmt = CommitDecl(cid)                 
@@ -205,6 +243,7 @@ class Zenoh(threading.Thread):
         if rid is None:
             rid = self.register_resource(rname, None)
             ds.append(ResourceDecl(rid, rname))
+        self.logger.debug('>> Declaring subscriber for resource: {} with id: {}'.format(rname, rid))
         ds.append(SubdcriberDecl(rid, PushSubMode()))
         ds.append(CommitDecl(self.next_commit_id()))
         send_msg(self.sock, Declare(0, self.next_s_sn(), ds))
@@ -219,6 +258,7 @@ class Zenoh(threading.Thread):
         if rid is None:
             rid = self.register_resource(rname, None)
             ds.append(ResourceDecl(rid, rname))
+        self.logger.debug('>> Declaring publisher for resource: {} with id: {}'.format(rname, rid))    
         ds.append(PublisherDecl(rid))
         ds.append(CommitDecl(self.next_commit_id()))
         send_msg(self.sock, Declare(0, self.next_s_sn(), ds))

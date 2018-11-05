@@ -4,6 +4,7 @@
 # in some cases messages will either only be sent or only received.
 
 from .message import *
+import logging
 
 def foo():
     _ = Message(0)
@@ -30,7 +31,7 @@ def encode_sequence(buf, xs, encoder):
     for x in xs:
         encoder(buf, x)
 
-def decode_sequence(buf, decoder):    
+def  decode_sequence(buf, decoder):    
     n = buf.get_vle()    
     xs = []
     for _ in range(0, n):
@@ -83,13 +84,13 @@ def decode_close(buf):
     reason = buf.get()
     return Close(pid, reason)
 
-def encode_res_decl(buf, d): 
+def encode_resource_decl(buf, d): 
     buf.put(d.header)
     buf.put_vle(d.rid)
     buf.put_string(d.rname)
     encode_properties(buf, d.properties)    
 
-def decode_res_decl(buf, h):
+def decode_resource_decl(buf, h):
     rid = buf.get_vle()    
     rname = buf.get_string()
     properties = decode_properties(buf, h) 
@@ -161,11 +162,11 @@ def decode_forget_decl(buf, h):
 
 def encode_declaration(buf, d):
     {
-        Declaration.RESOURCE : lambda d : encode_res_decl(buf, d),
+        Declaration.RESOURCE : lambda d : encode_resource_decl(buf, d),
         Declaration.PUBLISHER : lambda d : encode_pub_decl(buf, d),            
         Declaration.SUBSCRIBER : lambda d : encode_sub_decl(buf, d),   
         Declaration.COMMIT : lambda d : encode_commit_decl(buf, d),
-        Declaration.RESULT : lambda d : encode_res_decl (buf, d),
+        Declaration.RESULT : lambda d : encode_result_decl (buf, d),
         Declaration.FORGET_PUB : lambda d : encode_forget_decl(buf, d),
         Declaration.FORGET_SUB : lambda d : encode_forget_decl(buf, d),
         Declaration.FORGET_RES : lambda d : encode_forget_decl(buf, d),
@@ -176,11 +177,11 @@ def decode_declaration(buf):
     h = buf.get()
     id = Header.get_mid(h)
     decoder = {
-        Declaration.RESOURCE : lambda buf,h : decode_res_decl(buf, h),
+        Declaration.RESOURCE : lambda buf,h : decode_resource_decl(buf, h),
         Declaration.PUBLISHER : lambda buf,h: decode_pub_decl(buf, h),            
         Declaration.SUBSCRIBER : lambda buf,h : decode_sub_decl(buf, h),   
         Declaration.COMMIT : lambda buf,h : decode_commit_decl(buf, h),
-        Declaration.RESULT : lambda buf,h : decode_res_decl (buf, h),
+        Declaration.RESULT : lambda buf,h : decode_result_decl (buf, h),
         Declaration.FORGET_PUB : lambda buf,h : decode_forget_decl(buf, h),
         Declaration.FORGET_SUB : lambda buf,h : decode_forget_decl(buf, h),
         Declaration.FORGET_RES : lambda buf,h : decode_forget_decl(buf, h),
@@ -254,7 +255,7 @@ def decode_message(buf):
     }.get(mid, None)
 
     if decoder is None:
-        print(">>> Received unexpected message {} -- ignoring.".format)
+        logging.getLogger('io.zenoh').warning(">>> Received unexpected message {} -- ignoring.".format)
         return None
     else:
         return decoder(buf, h)

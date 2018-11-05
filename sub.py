@@ -4,7 +4,9 @@ import zenoh
 ap = argparse.ArgumentParser()
 ap.add_argument("-z", "--zenohd", required=True,
                 help="ip:port for the zenoh broker")
-
+                
+ap.add_argument("-l", "--log", required=False,
+                help="Log level (INFO, DEBUG, WARNING, ERROR, CRITICAL)")
 args = vars(ap.parse_args())
 
 def sub_callback(rid, data):
