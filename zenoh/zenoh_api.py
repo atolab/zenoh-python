@@ -7,7 +7,6 @@ from .codec import *
 import threading
 import logging
 import sys
-import signal
 
 def get_frame_len(sock):
     buf = IOBuf()
@@ -93,25 +92,19 @@ class Zenoh(threading.Thread):
         self.res_map = {}
         self.logger = logging.getLogger('io.zenoh')
         self.log_level = get_log_level()
-        self.logger.setLevel(self.log_level)
-        # fh = logging.FileHandler('zenoh-python-{}.log'.format(os.getpid()))
-        # fh.setLevel(logging.DEBUG)
-        # create console handler with a higher log level
+        self.logger.setLevel(self.log_level)        
         ch = logging.StreamHandler()
         ch.setLevel(self.log_level)
         # create formatter and add it to the handlers
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        # fh.setFormatter(formatter)
-        # add the handlers to logger
+        ch.setFormatter(formatter)        
         self.logger.addHandler(ch)
-        # self.logger.addHandler(fh)         
-        signal.signal(signal.SIGINT, self.signal_handler)
         
-    def signal_handler(self,sig, frame):        
+        
+    def close(self):        
         self.on_close(self)
         self.running = False
-        self.sock.close()                
+        self.sock.close() 
 
     def next_rid(self):
         id = self.next_rid_

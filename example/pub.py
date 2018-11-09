@@ -1,6 +1,7 @@
 import zenoh
 import argparse
 import time
+import signal 
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-z", "--zenohd", required=True,
@@ -20,10 +21,12 @@ def run_pub(broker):
     print('Declared Publisher on resource {}:{}'.format(pub.rname, pub.rid))
     pub.observe_matching(matching_observer)
     count = 0
-    while True:
+    for _ in range(1, 30):
         pub.write('[{}]: Hello to the Zenoh World'.format(count).encode())
         count += 1
-        time.sleep(1)
+        time.sleep(0.5)
+
+    z.close()
 
 if __name__ == '__main__':    
     run_pub(args['zenohd'])
