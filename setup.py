@@ -8,11 +8,13 @@ setup(
     packages=['zenoh', ],
     author='kydos',
     description="Python client API for zenoh",
-    long_description='README.md',
+    long_description=read('README.md'),
     long_description_content_type="text/markdown",
     url='https://github.com/atolab/zenoh-python',
     classifiers=[
         "Programming Language :: Python :: 3",        
+        "Development Status :: 3 - Alpha",
+        "Topic :: Protoco. API",
         'License :: OSI Approved :: Apache Software License',
         'License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)',        
         "Operating System :: OS Independent"]
