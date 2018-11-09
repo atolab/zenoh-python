@@ -12,7 +12,8 @@ setup(
     long_description_content_type="text/markdown",
     url='https://github.com/atolab/zenoh-python',
     classifiers=[
-        "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Apache 2.0 License",
+        "Programming Language :: Python :: 3",        
+        'License :: OSI Approved :: Apache Software License',
+        'License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)',        
         "Operating System :: OS Independent"]
     )
