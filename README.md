@@ -1,6 +1,6 @@
 # Zenoh Python API
 
-Zenoh is an extremely efficient and fault-tolerant [Named Data Networking](http://named-data.net) (NDN) protocol 
+[Zenoh](http://zenoh.io) is an extremely efficient and fault-tolerant [Named Data Networking](http://named-data.net) (NDN) protocol 
 that is able to scale down to extremely constrainded devices and networks. 
 
 The Python API is for pure clients, in other terms does not support peer-to-peer communication and can be easily
