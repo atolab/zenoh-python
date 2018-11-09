@@ -145,7 +145,7 @@ class Zenoh(threading.Thread):
         node_id = uuid.getnode()
         client_id = bytearray(int.to_bytes(node_id, 6, byteorder='big'))        
         pid = os.getpid()
-        postfix = int.to_bytes(pid, 2, byteorder='big')
+        postfix = int.to_bytes(pid, 4, byteorder='big')
         for b in postfix:
             client_id.append(b)
         
