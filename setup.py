@@ -17,8 +17,9 @@ setup(
     url='https://github.com/atolab/zenoh-python',
     classifiers=[
         "Programming Language :: Python :: 3",        
+        "Intended Audience :: Developers",
         "Development Status :: 3 - Alpha",
-        "Topic :: Protoco. API",
+        "Topic :: System :: Networking",
         'License :: OSI Approved :: Apache Software License',
         'License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)',        
         "Operating System :: OS Independent"]
