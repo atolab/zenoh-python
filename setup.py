@@ -7,6 +7,4 @@ setup(
     version='0.1.0',
     packages=['zenoh', ],
     author='kydos',
-    url='https://github.com/atolab/zenoh-python',
-    install_requires=['jsonpickle']
-)
+    url='https://github.com/atolab/zenoh-python')
