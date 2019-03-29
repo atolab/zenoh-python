@@ -206,7 +206,6 @@ def decode_declare(buf, h):
     return Declare(Header.get_flags(h), sn, ds)
 
 def encode_cdata(buf, m):
-    print("Encoding CDATA MID = {} ".format(m.header))
     buf.put(m.header)
     buf.put_vle(m.sn)
     buf.put_vle(m.rid)
@@ -332,13 +331,10 @@ def decode_message(buf):
         Message.SDATA : lambda buf,h : decode_sdata(buf, h),
         Message.WDATA : lambda buf,h : decode_wdata(buf, h)
     }.get(mid, None)
-    print("Decoding incoming message : {} ".format(mid))
     if decoder is None:        
         logging.getLogger('io.zenoh').warning(">>> Received unexpected message {} -- ignoring.".format)
         return None
-    else:
-        dm = decoder(buf, h)
-        print("decoded message > {}".format(dm))
-        return dm
+    else:        
+        return decoder(buf, h)
     
 

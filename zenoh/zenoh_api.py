@@ -217,7 +217,6 @@ class Zenoh(threading.Thread):
         try:
             while self.running:                    
                 m = recv_msg(self.sock)
-                print('>> Received msg with id: {}'.format(m.mid))
                 default_case = lambda msg : self.handle_other_msg(msg)
                 {
                     Message.SDATA : lambda msg : self.handle_sdata(msg),

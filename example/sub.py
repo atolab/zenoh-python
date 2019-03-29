@@ -10,12 +10,10 @@ ap.add_argument("-l", "--log", required=False,
 args = vars(ap.parse_args())
 
 def sub_callback(rid, data):
-    try:
-        print(type(data))
-        print('Received \'{}\' for resource {}'.format(data.decode('utf-8'), rid))
+    try:        
+        print('Received \'{}\' for resource {}'.format(bytes(data).decode('utf-8'), rid))
     except:
-         e = sys.exc_info()[0]
-         e.with_traceback()
+         e = sys.exc_info()[0]         
          print("{}".format(e))
 
 
