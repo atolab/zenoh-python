@@ -205,7 +205,8 @@ def decode_declare(buf, h):
     ds = decode_sequence(buf, decode_declaration)
     return Declare(Header.get_flags(h), sn, ds)
 
-def encode_sdata(buf, m):
+def encode_cdata(buf, m):
+    print("Encoding CDATA MID = {} ".format(m.header))
     buf.put(m.header)
     buf.put_vle(m.sn)
     buf.put_vle(m.rid)
@@ -213,14 +214,90 @@ def encode_sdata(buf, m):
         buf.put_vle(m.prid)    
     buf.put_bytes(m.payload)
 
-def decode_sdata(buf, h):
+def decode_cdata(buf, h):
     sn = buf.get_vle()
     rid = buf.get_vle()
     prid = None
     if Header.has_flag(h, Header.A_FLAG):
         prid = buf.get_vle()
     payload = buf.get_bytes()
-    return StreamData(Header.get_flags(h), sn, rid, payload, prid)
+    return CompactData(Header.get_flags(h), sn, rid, payload, prid)
+
+def encode_payload_header(buf, ph):
+    buf.put(ph.flags)
+    if ph.src_id is not None:
+        buf.put_vle(ph.src_id)
+    
+    if ph.src_sn is not None:
+        buf.put_vle(ph.src_sn)
+
+    if ph.brk_id is not None:
+        buf.put_bytes(ph.brk_id)
+
+    if ph.brk_sn is not None:
+        buf.put_vle(ph.brk_sn)
+            
+    if ph.kind is not None:
+        buf.put_vle(ph.kind)
+    
+    if ph.encoding is not None:
+        buf.put_vle(ph.encoding)
+
+def decode_payload_header(buf):
+    flags = buf.get()    
+    src_id = None
+    src_sn = None 
+    brk_id = None 
+    brk_sn = None 
+    t_stamp = None 
+    kind = None 
+    encoding = None
+
+    if flags == 0:
+        return PayloadHeader()
+    else:
+        if (flags | PayloadHeader.SRC_ID_FLAG != 0):
+            src_id = buf.get_vle()
+        if (flags | PayloadHeader.SRC_SN_FLAG != 0):
+            src_sn = buf.get_vle()
+        if (flags | PayloadHeader.BRK_ID_FLAG != 0):
+            brk_id = buf.get_vle()
+        if (flags | PayloadHeader.BRK_SN_FLAG != 0):
+            brk_sn = buf.get_vle()
+        if (flags | PayloadHeader.T_STAMP_FLAG != 0):
+            # we are not dealint with TS currently
+            buf.get_vle()
+            buf.get_n(16)
+        if (flags | PayloadHeader.KIND_FLAG != 0):
+            kind = buf.get_vle()
+        if (flags | PayloadHeader.ENCODING_FLAG != 0):
+            encoding = buf.get_vle()
+    
+    return PayloadHeader(src_id, src_sn, brk_id, brk_sn, t_stamp, kind, encoding)
+    
+
+def encode_sdata(buf, m):
+    buf.put(m.header)
+    buf.put_vle(m.sn)
+    buf.put_vle(m.rid)
+    if m.prid is not None:
+        buf.put_vle(m.prid)
+    encode_payload_header(buf, m.payload_header)    
+    buf.put_bytes(m.payload)
+
+def decode_sdata(buf, h):    
+    sn = buf.get_vle()
+    rid = buf.get_vle()
+    prid = None
+    if Header.has_flag(h, Header.A_FLAG):
+        prid = buf.get_vle()
+    n = buf.get_vle()        
+    c_pos = buf.read_pos
+    payload_header = decode_payload_header(buf)
+    delta = buf.read_pos - c_pos        
+    payload = buf.get_n(n - delta)      
+    return StreamData(Header.get_flags(h), sn, rid, payload_header, payload, prid)
+
 
 def encode_wdata(buf, m):
     buf.put(m.header)
@@ -239,6 +316,7 @@ def encode_message(buf, m):
         Message.SCOUT : lambda buf,m : encode_scout(buf, m),
         Message.OPEN : lambda buf,m : encode_open(buf, m),
         Message.DECLARE : lambda buf,m : encode_declare(buf, m),
+        Message.CDATA : lambda buf,m : encode_cdata(buf, m),
         Message.SDATA : lambda buf,m : encode_sdata(buf, m),
         Message.WDATA : lambda buf,m : encode_wdata(buf, m)
     }.get(m.mid)(buf,m) 
@@ -250,14 +328,17 @@ def decode_message(buf):
         Message.SCOUT : lambda buf,h : decode_scout(buf, h),
         Message.ACCEPT : lambda buf,h : decode_accept(buf, h),
         Message.DECLARE : lambda buf,h : decode_declare(buf, h),
+        Message.CDATA : lambda buf,h : decode_cdata(buf, h),
         Message.SDATA : lambda buf,h : decode_sdata(buf, h),
         Message.WDATA : lambda buf,h : decode_wdata(buf, h)
     }.get(mid, None)
-
-    if decoder is None:
+    print("Decoding incoming message : {} ".format(mid))
+    if decoder is None:        
         logging.getLogger('io.zenoh').warning(">>> Received unexpected message {} -- ignoring.".format)
         return None
     else:
-        return decoder(buf, h)
+        dm = decoder(buf, h)
+        print("decoded message > {}".format(dm))
+        return dm
     
 
