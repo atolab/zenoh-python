@@ -31,9 +31,7 @@ class Zenoh(object):
         self.zlib.z_write_data_wo.restype = c_int 
         self.zlib.z_write_data_wo.argtypes = [c_void_p, c_char_p, c_char_p, c_int, c_uint8, c_uint8]
 
-        print('Open session with zenoh at {}', locator)
         self.zenoh = self.zlib.z_open_wup(locator.encode(), uid, pwd)
-        print('Opened?')
         if self.zenoh != None:
             self.connected = True
         else:
@@ -56,7 +54,6 @@ class Zenoh(object):
     def stream_data(self, pub, data):
         # buf = create_string_buffer(data)        
         l = len(data)
-        print('len: {}'.format(l))
         self.zlib.z_stream_data(pub, data, l)        
 
     def close(self):        
