@@ -17,12 +17,12 @@ def matching_observer(b):
 def run_pub(broker):        
     z = zenoh.connect(broker)   
     print('Declaring Publisher')
-    pub = z.declare_publisher('//demo/hello')
+    pub = z.declare_publisher('/demo/hello')
     print('Declared Publisher on resource {}:{}'.format(pub.rname, pub.rid))
     pub.observe_matching(matching_observer)
     count = 0
     for _ in range(1, 30):
-        pub.write('[{}]: Hello to the Zenoh World'.format(count).encode())
+        pub.write('[{}]: Hello to the Zenoh World!'.format(count).encode())
         count += 1
         time.sleep(0.5)
 

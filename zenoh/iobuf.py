@@ -64,6 +64,12 @@ class IOBuf(object):
         else:
              raise IOBufException('Cannot read beyond write position (read_pos : {}, write_pos: {})'.format(self.read_pos, self.write_pos))
 
+    def get_n(self, n):
+        bs = array.array('B')
+        for _ in range(0, n):
+            bs.append(self.get())            
+        return bs
+
     def put_vle(self, v):
         if v < 0x7f:            
             self.put(v)

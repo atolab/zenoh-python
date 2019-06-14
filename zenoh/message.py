@@ -15,7 +15,8 @@ class Message(object):
 
     DECLARE = 0x06
 
-    SDATA = 0x07
+    SDATA = 0x1a
+    CDATA = 0x07
     BDATA = 0x08
     WDATA = 0x09
 
@@ -248,13 +249,64 @@ class Declare(ReliableHeader):
         self.declarations = declarations
 
 
-class StreamData(ReliableHeader):
+class CompactData(ReliableHeader):
     def __init__(self, flags, sn, rid, payload, prid=None):
-        super(StreamData, self).__init__(flags, Message.SDATA, sn)
+        super(CompactData, self).__init__(flags, Message.CDATA, sn)
         self.sn = sn
         self.rid = rid
         self.payload = payload
         self.prid = prid
+
+class PayloadHeader(object):
+    SRC_ID_FLAG = 0x01
+    SRC_SN_FLAG = 0x02
+    BRK_ID_FLAG = 0x04
+    BRK_SN_FLAG = 0x08
+    T_STAMP_FLAG = 0x10
+    KIND_FLAG = 0x20
+    ENCODING_FLAG = 0x40  
+    
+    def __init__(self, src_id = None, src_sn = None, brk_id = None, brk_sn = None, t_stamp = None, kind = None, encoding = None):
+        self.flags = 0
+        self.src_id = src_id
+        if src_id is not None:
+            self.flags = self.flags | PayloadHeader.SRC_ID_FLAG
+
+        self.src_sn = src_sn
+        if self.src_sn is not None:
+            self.flags = self.flags | PayloadHeader.SRC_SN_FLAG
+
+        self.brk_id = brk_id
+        if self.brk_id is not None:
+            self.flags = self.flags | PayloadHeader.BRK_ID_FLAG
+
+        self.brk_sn = brk_sn
+        if self.brk_sn is not None:
+            self.flags = self.flags | PayloadHeader.BRK_SN_FLAG
+
+        # Timestamp is not currently supported.
+        # self.t_stamp = t_stamp
+        # if self.t_stamp is not None:
+        #     self.flags = self.flags | PayloadHeader.T_STAMP_FLAG
+
+        self.kind = kind
+        if self.kind is not None:
+            self.flags = self.flags | PayloadHeader.KIND_FLAG
+
+        self.encoding = encoding
+        if self.encoding is not None:
+            self.flags = self.flags | PayloadHeader.ENCODING_FLAG
+
+
+class StreamData(ReliableHeader):
+    def __init__(self, flags, sn, rid, payload_header, payload, prid=None):
+        super(StreamData, self).__init__(flags, Message.SDATA, sn)
+        self.sn = sn
+        self.rid = rid
+        self.payload = payload
+        self.payload_header = payload_header
+        self.prid = prid
+
 
 class WriteData(ReliableHeader):
     def __init__(self, flags, sn, rname, payload):

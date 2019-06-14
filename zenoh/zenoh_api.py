@@ -166,10 +166,16 @@ class Zenoh(threading.Thread):
         self.logger.warning(' Received message {} -- ignoring'.format(msg.mid))
     
     def handle_sdata(self, msg):
+        self.logger.debug("dispatching sdata")
         cs = self.subs.get(msg.rid, [])     
         for listener in cs:
             listener(msg.rid, msg.payload)
     
+    def handle_cdata(self, msg):
+        cs = self.subs.get(msg.rid, [])     
+        for listener in cs:
+            listener(msg.rid, msg.payload)
+
     def handle_wdata(self, msg):
         self.logger.warning('>> Received message {} -- ignoring'.format(msg.mid))
         
@@ -211,10 +217,10 @@ class Zenoh(threading.Thread):
         try:
             while self.running:                    
                 m = recv_msg(self.sock)
-                self.logger.debug('>> Received msg with id: {}'.format(m.mid))
                 default_case = lambda msg : self.handle_other_msg(msg)
                 {
                     Message.SDATA : lambda msg : self.handle_sdata(msg),
+                    Message.CDATA : lambda msg : self.handle_cdata(msg),
                     Message.WDATA : lambda msg : self.handle_wdata(msg),
                     Message.CLOSE : lambda msg : self.handle_close(msg),
                     Message.DECLARE : lambda msg : self.handle_declare(msg)
@@ -279,6 +285,6 @@ class Zenoh(threading.Thread):
             self.pubs[rid] = None
 
     def write_sdata(self, rid, data):
-        m = StreamData(0, self.next_s_sn(),rid, data)
+        m = CompactData(0, self.next_s_sn(),rid, data)
         send_msg(self.sock, m)
 
