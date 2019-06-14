@@ -8,7 +8,7 @@ def read(fname):
 
 setup(
     name='zenoh',
-    version='0.1.2',
+    version='0.1.2b',
     packages=['zenoh', ],
     author='kydos',
     description="Python client API for zenoh",

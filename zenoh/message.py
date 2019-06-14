@@ -79,6 +79,9 @@ class Header(Message):
         self.flags = flags        
         self.header = self.flags | self.mid        
 
+    def has_properties(self):
+        return self.flags & Header.P_FLAG != 0
+
 class ReliableHeader(Header):
     def __init__(self, flags, mid, sn):
         super(ReliableHeader, self).__init__(flags, mid)
