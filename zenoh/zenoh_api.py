@@ -1,5 +1,21 @@
 from .binding import *
 
+class SubscriberMode(object):
+  Z_PUSH_MODE = 0x01
+  Z_PULL_MODE = 0x02
+  Z_PERIODIC_PUSH_MODE = 0x03
+  Z_PERIODIC_PULL_MODE = 0x04
+
+
+  def __init__(self, kind, tprop):
+    self.kind = kind
+    self.tprop = tprop
+  
+  @staticmethod 
+  def push():
+    return SubscriberMode(Z_PUSH_MODE, z_temporal_property_t(0, 0))
+
+
 class Zenoh(object):   
     def __init__(self,  locator, uid = None, pwd = None):                                                  
         self.zlib =  CDLL(zenoh_lib_path)
@@ -32,6 +48,7 @@ class Zenoh(object):
         self.zlib.z_write_data_wo.argtypes = [c_void_p, c_char_p, c_char_p, c_int, c_uint8, c_uint8]
 
         self.zenoh = self.zlib.z_open_wup(locator.encode(), uid, pwd)
+        
         if self.zenoh != None:
             self.connected = True
         else:
@@ -45,14 +62,21 @@ class Zenoh(object):
             return r.value.pub
         else:
             raise 'Unable to create publisher'
+
+    def declare_subscriber(self, res_name, sub_mode, callback):
+        listener = SubscriberCallback(callback)
+        r = self.zlib.z_declare_subscriber(res_name, sub_mode, listener.callback)
+        if r.tag == 0:
+            return r.value.sub
+        else:
+            raise 'Unable to create subscriber'
+
         
-    def stream_compact_data(self, pub, data):
-        # buf = create_string_buffer(data)        
+    def stream_compact_data(self, pub, data):          
         l = len(data)
         self.zlib.z_stream_compact_data(pub, data, l)
 
-    def stream_data(self, pub, data):
-        # buf = create_string_buffer(data)        
+    def stream_data(self, pub, data):             
         l = len(data)
         self.zlib.z_stream_data(pub, data, l)        
 

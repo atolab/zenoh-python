@@ -78,15 +78,35 @@ class z_data_info_t(Structure):
 
 # Temporal properties  
 class z_temporal_property_t(Structure):
-    [('origin', c_int), ('period', c_int),('duration', c_int)] 
+    _fields_ = [('origin', c_int), ('period', c_int),('duration', c_int)] 
 
 
 class z_sub_mode_t(Structure):
-  [('kind', c_uint8), ('tprop', z_temporal_property_t)]
-  
-# zenoh-c callbacks
+  _fields_ = [('kind', c_uint8), ('tprop', z_temporal_property_t)]
+
 
 CHAR_PTR = POINTER(c_char)
+# zenoh-c callbacks
+class z_reply_value_t(Structure):
+  _fields_ = [
+    ('kind', c_uint8), 
+    ('stoid', CHAR_PTR),
+    ('stoid_length', c_size_t),
+    ('rsn', c_uint32), 
+    ('rname', c_char_p),
+    ('data', CHAR_PTR),
+    ('data_length', c_size_t),
+    ('info', z_data_info_t)]
+
 
 ZENOH_ON_DISCONNECT_CALLBACK_PROTO = CFUNCTYPE(None, c_void_p)
-ZENOH_SUBSCRIBER_CALLBACK_PROTO = CFUNCTYPE(None, z_resource_id_t, c_char_p, c_uint, z_data_info_t)
+ZENOH_SUBSCRIBER_CALLBACK_PROTO = CFUNCTYPE(None, z_resource_id_t, CHAR_PTR, c_uint, z_data_info_t)
+ZENOH_REPLY_CALLBACK = CFUNCTYPE(None, z_reply_value_t)
+
+class SubscriberCallback(object):
+    def __init__(self, callback):
+        self.callback = callback
+
+    @ZENOH_SUBSCRIBER_CALLBACK_PROTO
+    def trampoline_callback(self, rid, data, length, info):
+        self.callback(rid, data, length, info)

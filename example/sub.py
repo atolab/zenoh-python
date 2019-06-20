@@ -1,31 +1,22 @@
+import zenoh
 import argparse
-import zenoh 
-import sys
+import time
+import signal 
+
 ap = argparse.ArgumentParser()
 ap.add_argument("-z", "--zenohd", required=True,
                 help="ip:port for the zenoh broker")
 
-ap.add_argument("-l", "--log", required=False,
-                help="Log level (INFO, DEBUG, WARNING, ERROR, CRITICAL)")
 args = vars(ap.parse_args())
 
-def sub_callback(rid, data):
-    try:        
-        print('Received \'{}\' for resource {}'.format(bytes(data).decode('utf-8'), rid))
-    except:
-         e = sys.exc_info()[0]         
-         print("{}".format(e))
-
-
-def run_sub(broker):        
-    z = zenoh.connect(broker)   
-    print('Declaring Subscriber')
-    rname = '//demo/hello'
-    rid = z.declare_subscriber(rname, sub_callback)    
-    print('Declared subscriber for {}:{}'.format(rname, rid))
-
+def listener(rid, data, length, info):
+    print('Received {} bytes of data'.format(length))
 
 if __name__ == '__main__':    
-    run_sub(args['zenohd'])
-
-
+    z = zenoh.Zenoh(args['zenohd'], 'user'.encode(), 'password'.encode())
+    r_name = '/demo/hello/python'
+    
+    print('Declaring Subscriber for {}', r_name)
+    
+    pub = z.declare_publisher(r_name, SubscriberMode.push(), listener)
+    time.sleep(60)
