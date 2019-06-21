@@ -1,19 +1,30 @@
 from .binding import *
 
 class SubscriberMode(object):
-  Z_PUSH_MODE = 0x01
-  Z_PULL_MODE = 0x02
-  Z_PERIODIC_PUSH_MODE = 0x03
-  Z_PERIODIC_PULL_MODE = 0x04
+  Z_PUSH_MODE = 1
+  Z_PULL_MODE = 2
+  Z_PERIODIC_PUSH_MODE = 3
+  Z_PERIODIC_PULL_MODE = 4
 
 
   def __init__(self, kind, tprop):
-    self.kind = kind
-    self.tprop = tprop
-  
+    self.z_sm = z_sub_mode_t()
+    self.z_sm.kind = c_uint8(kind)
+    self.z_sm.tprop.origin = 0
+    self.z_sm.tprop.period = 0
+    self.z_sm.tprop.duration = 0
+
+    if tprop is not None:
+        self.z_sm.tprop.origin = tprop.origin
+        self.z_sm.tprop.period = tprop.period
+        self.z_sm.tprop.duration = tprop.duration
+
+
   @staticmethod 
   def push():
-    return SubscriberMode(Z_PUSH_MODE, z_temporal_property_t(0, 0))
+    return SubscriberMode(SubscriberMode.Z_PUSH_MODE, None)
+
+
 
 
 class Zenoh(object):   
@@ -24,7 +35,7 @@ class Zenoh(object):
         self.zlib.z_open_wup.argtypes = [c_char_p, c_char_p, c_char_p]
 
         self.zlib.z_declare_subscriber.restype = z_sub_p_result_t
-        self.zlib.z_declare_subscriber.argtypes = [c_void_p, c_char_p, z_temporal_property_t, ZENOH_SUBSCRIBER_CALLBACK_PROTO]
+        self.zlib.z_declare_subscriber.argtypes = [c_void_p, c_char_p, POINTER(z_sub_mode_t), ZENOH_SUBSCRIBER_CALLBACK_PROTO]
 
         self.zlib.z_declare_publisher.restype = z_pub_p_result_t
         self.zlib.z_declare_publisher.argtypes = [c_void_p, c_char_p]
@@ -64,8 +75,10 @@ class Zenoh(object):
             raise 'Unable to create publisher'
 
     def declare_subscriber(self, res_name, sub_mode, callback):
-        listener = SubscriberCallback(callback)
-        r = self.zlib.z_declare_subscriber(res_name, sub_mode, listener.callback)
+        print('Submode: {}'.format(sub_mode.z_sm.kind))
+        listener = SubscriberCallback(callback)      
+        tcb = listener.trampoline_callback;        
+        r = self.zlib.z_declare_subscriber(self.zenoh, res_name.encode(), byref(sub_mode.z_sm), tcb)
         if r.tag == 0:
             return r.value.sub
         else:

@@ -14,9 +14,9 @@ def listener(rid, data, length, info):
 
 if __name__ == '__main__':    
     z = zenoh.Zenoh(args['zenohd'], 'user'.encode(), 'password'.encode())
-    r_name = '/demo/hello/python'
+    r_name = '/demo/hello/*'
     
     print('Declaring Subscriber for {}', r_name)
     
-    pub = z.declare_publisher(r_name, SubscriberMode.push(), listener)
+    pub = z.declare_subscriber(r_name, zenoh.SubscriberMode.push(), listener)
     time.sleep(60)

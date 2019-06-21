@@ -1,2 +1,2 @@
-from zenoh.zenoh_api import Zenoh
+from zenoh.zenoh_api import *
 

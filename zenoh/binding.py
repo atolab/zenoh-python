@@ -108,5 +108,5 @@ class SubscriberCallback(object):
         self.callback = callback
 
     @ZENOH_SUBSCRIBER_CALLBACK_PROTO
-    def trampoline_callback(self, rid, data, length, info):
-        self.callback(rid, data, length, info)
+    def trampoline_callback(self, rid, data, length):
+        self.callback(rid, data, length, None)
