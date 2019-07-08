@@ -75,13 +75,20 @@ class Zenoh(object):
             raise 'Unable to create publisher'
 
     def declare_subscriber(self, res_name, sub_mode, callback):        
-        arg = SubscriberCallback(callback)              
-        r = self.zlib.z_declare_subscriber(self.zenoh, res_name.encode(), byref(sub_mode.z_sm), z_subscriber_trampoline_callback, c_void_p(byref(arg)))
+        global subscriberCallbackMap        
+        h = hash(callback)
+        k = POINTER(c_int64)()
+        k.contents = c_int64()
+        k.contents.value = h        
+        r = self.zlib.z_declare_subscriber(self.zenoh, res_name.encode(), byref(sub_mode.z_sm), z_subscriber_trampoline_callback, k)
+        subscriberCallbackMap[h] = (k, callback)        
         if r.tag == 0:
             return r.value.sub
-        else:
+        else:            
+            del subscriberCallbackMap[h]
             raise 'Unable to create subscriber'
-
+        
+        
         
     def stream_compact_data(self, pub, data):          
         l = len(data)
