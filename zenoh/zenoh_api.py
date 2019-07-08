@@ -103,7 +103,7 @@ class Zenoh(object):
 
     def write_data_wo(self, resource, data, encoding, kind):
         l = len(data)
-        self.zlib.z_write_data(self.zenoh, resource, data, l, 0, Z_PUT)
+        self.zlib.z_write_data(self.zenoh, resource, data, l, encoding, kind)
 
     def write_data(self, resource, data):
         self.write_data_wo(resource, data, 0, Z_PUT)
