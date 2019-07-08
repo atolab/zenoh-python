@@ -9,8 +9,8 @@ ap.add_argument("-z", "--zenohd", required=True,
 
 args = vars(ap.parse_args())
 
-def callback(rid, data, length, info):
-    print('Received {} bytes of data'.format(length))
+def callback(rname, data, length, info):
+    print('Received {} bytes of data for resource {} with encoding {}'.format(length, rname, info.encoding))
 
 if __name__ == '__main__':    
     z = zenoh.Zenoh(args['zenohd'], 'user'.encode(), 'password'.encode())

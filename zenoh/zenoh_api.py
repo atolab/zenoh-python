@@ -25,8 +25,6 @@ class SubscriberMode(object):
     return SubscriberMode(SubscriberMode.Z_PUSH_MODE, None)
 
 
-
-
 class Zenoh(object):   
     def __init__(self,  locator, uid = None, pwd = None):                                                  
         self.zlib =  CDLL(zenoh_lib_path)
@@ -37,6 +35,8 @@ class Zenoh(object):
         self.zlib.z_declare_subscriber.restype = z_sub_p_result_t
         self.zlib.z_declare_subscriber.argtypes = [c_void_p, c_char_p, POINTER(z_sub_mode_t), ZENOH_SUBSCRIBER_CALLBACK_PROTO, POINTER(c_int64)]
 
+        self.zlib.z_declare_storage.restype = z_sto_p_result_t
+        self.zlib.z_declare_storage.argtypes = [c_void_p, c_char_p, ZENOH_SUBSCRIBER_CALLBACK_PROTO, ZENOH_QUERY_HANDLER_PROTO, ZENOH_REPLY_CLEANER_PROTO, POINTER(c_int64)]
         self.zlib.z_declare_publisher.restype = z_pub_p_result_t
         self.zlib.z_declare_publisher.argtypes = [c_void_p, c_char_p]
 
@@ -57,9 +57,12 @@ class Zenoh(object):
 
         self.zlib.z_write_data_wo.restype = c_int 
         self.zlib.z_write_data_wo.argtypes = [c_void_p, c_char_p, c_char_p, c_int, c_uint8, c_uint8]
-        # int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg);
+
         self.zlib.z_query.restype = c_int
         self.zlib.z_query.argtypes = [c_void_p, c_char_p, c_char_p, ZENOH_REPLY_CALLBACK_PROTO, POINTER(c_int64)]
+
+        self.zlib.intersect.restype = c_int 
+        self.zlib.intersect.argtypes = [c_char_p, c_char_p]
 
         self.zenoh = self.zlib.z_open_wup(locator.encode(), uid, pwd).value.zenoh
         
@@ -69,6 +72,12 @@ class Zenoh(object):
             raise 'Unable to open zenoh session!'
 
         self.zlib.z_start_recv_loop(self.zenoh)
+
+    def intersect(self, a, b):
+        if self.zlib.intersect(a.encode(), b.encode()) == 1:
+            return True
+        else: 
+            return False
 
     def declare_publisher(self, res_name):
         r = self.zlib.z_declare_publisher(self.zenoh, res_name.encode())
@@ -91,6 +100,20 @@ class Zenoh(object):
             del subscriberCallbackMap[h]
             raise 'Unable to create subscriber'
         
+    def declare_storage(self, resource, subscriber_callback, query_handler):
+        global replyCallbackMap
+        h = hash(query_handler)
+        k = POINTER(c_int64)()
+        k.contents = c_int64()
+        k.contents.value = h                
+        r = self.zlib.z_declare_storage(self.zenoh, z_subscriber_trampoline_callback, z_query_handler_trampoline, z_no_op_reply_cleaner, k)
+        subscriberCallbackMap[h] = subscriber_callback
+        queryHandlerMap[h] = query_handler
+        if r.tag == 0:
+            return r.value.sto
+        else:
+            del subscriberCallbackMap[h]
+            del replyCallbackMap[h]            
         
         
     def stream_compact_data(self, pub, data):          
