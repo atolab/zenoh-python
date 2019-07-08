@@ -112,6 +112,19 @@ class z_reply_value_t(Structure):
     ('data_length', c_size_t),
     ('info', z_data_info_t)]
 
+class QueryReply(object):
+  STORAGE_DATA = 0x00
+  STORAGE_FINAL = 0x01 
+  REPLY_FINAL = 0x02 
+
+  def __init__(self, zrv):
+    self.kind = zrv.kind
+    self.store_id = zrv.stoid[:zrv.stoid_length]
+    self.sn = zrv.rsn
+    self.rname = zrv.rname.decode()
+    self.data = zrv.data[:zrv.data_length]
+    self.info = zrv.info
+
 class z_resource_t(Structure):
   _fields_ = [
     ('rname', c_char_p),
@@ -139,7 +152,7 @@ def z_subscriber_trampoline_callback(rid, data, length, info, arg):
   key = arg.contents.value  
   _, callback = subscriberCallbackMap[key]  
   if rid.contents.kind == Z_STR_RES_ID:          
-    callback(rid.contents.id.rname.decode(), data, length, info.contents)
+    callback(rid.contents.id.rname.decode(), data[:length], info.contents)
   else:
     print('WARNING: Received data for unknown  resource name, rid = {}'.format(rid.id.rid))
 
@@ -148,7 +161,7 @@ def z_reply_trampoline_callback(reply_value, arg):
   global replyCallbackMap
   key = arg.contents.value  
   _, callback = replyCallbackMap[key]  
-  callback(reply_value.contents)
+  callback(QueryReply(reply_value.contents))
 
 @ZENOH_QUERY_HANDLER_PROTO
 def z_query_handler_trampoline(rname, predicate, p_replies, arg):
@@ -165,10 +178,10 @@ def z_query_handler_trampoline(rname, predicate, p_replies, arg):
   replies.elem =  rs  
   i = 0
   for k,v in kvs:    
-    (d, l), info = v
+    d, info = v
     rs[i].rname = k.encode()
-    rs[i].data = d
-    rs[i].length = l
+    rs[i].data = create_string_buffer(d)
+    rs[i].length = len(d)
     rs[i].encoding = info.encoding
     rs[i].kind = info.kind
     i += 1    

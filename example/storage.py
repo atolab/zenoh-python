@@ -11,9 +11,9 @@ args = vars(ap.parse_args())
 
 store =  {}
 
-def insert_handler(rname, data, length, info):
+def insert_handler(rname, data, info):
   print('Inserting data for resource: {}'.format(rname))
-  store[rname] = ((data, length), info)
+  store[rname] = (data, info)
 
 def query_handler(path_selector, content_selector):  
   reply = []

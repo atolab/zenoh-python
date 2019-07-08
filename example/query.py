@@ -10,10 +10,11 @@ ap.add_argument("-z", "--zenohd", required=True,
 args = vars(ap.parse_args())
 
 
-def callback(data):
-  if data.kind == zenoh.Z_STORAGE_DATA:
-    print('Received data for resource: {}'.format(data.rname.decode()))
-  elif data.kind == zenoh.Z_STORAGE_FINAL:
+def callback(reply):  
+  if reply.kind == zenoh.QueryReply.STORAGE_DATA:
+    print('Received: ({}, {}) '.format(reply.rname, reply.data))
+    
+  elif reply.kind == zenoh.Z_STORAGE_FINAL:
     print('Received storage final')
   else:
     print('Received Reply final')

@@ -9,16 +9,17 @@ ap.add_argument("-z", "--zenohd", required=True,
 
 args = vars(ap.parse_args())
 
-def callback(rname, data, length, info):    
-    print('Received {} bytes of data for resource {} with encoding {}'.format(length, rname, info.encoding))
+def callback(rname, data, info):    
+    print('Received {} bytes of data for resource {} with encoding {}'.format(len(data), rname, info.encoding))
+    print(data)
     
-    print('{}'.format(type(data)))    
-    print('{}'.format(type(data.contents)))    
+    # print('{}'.format(type(data)))    
+    # print('{}'.format(type(data.contents)))    
 
-    print('content type = {}'.format(data.contents))
-    print('content type = {}'.format(data[:(length)]))
-    for i in range(0,length):
-        print('{}: {:02x}'.format(i, data[i][0]))
+    # print('content type = {}'.format(data.contents))
+    # print('content type = {}'.format(data[:(length)]))
+    # for i in range(0,length):
+    #     print('{}: {:02x}'.format(i, data[i][0]))
     
 
 if __name__ == '__main__':    
