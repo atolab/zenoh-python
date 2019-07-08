@@ -12,6 +12,7 @@ Z_UPDATE    = 0x01
 Z_REMOVE    = 0x02
 
 subscriberCallbackMap = {}
+replyCallbackMap = {}
 
 def get_lib_ext():
     system = platform.system()
@@ -102,7 +103,7 @@ class z_reply_value_t(Structure):
 
 ZENOH_ON_DISCONNECT_CALLBACK_PROTO = CFUNCTYPE(None, c_void_p)
 ZENOH_SUBSCRIBER_CALLBACK_PROTO = CFUNCTYPE(None, POINTER(z_resource_id_t), CHAR_PTR, c_uint, POINTER(z_data_info_t), POINTER(c_int64))
-ZENOH_REPLY_CALLBACK = CFUNCTYPE(None, POINTER(z_reply_value_t), c_void_p)
+ZENOH_REPLY_CALLBACK = CFUNCTYPE(None, POINTER(z_reply_value_t), POINTER(c_int64))
 
 @ZENOH_SUBSCRIBER_CALLBACK_PROTO
 def z_subscriber_trampoline_callback(rid, data, length, info, arg):
@@ -110,3 +111,11 @@ def z_subscriber_trampoline_callback(rid, data, length, info, arg):
   key = arg.contents.value  
   _, callback = subscriberCallbackMap[key]  
   callback(rid, data, length, info)
+
+
+@ZENOH_REPLY_CALLBACK
+def z_reply_trampoline_callback(reply_value, arg):
+  global replyCallbackMap
+  key = arg.contents.value  
+  _, callback = replyCallbackMap[key]  
+  callback(reply_value)
