@@ -2,15 +2,24 @@ import argparse
 import time
 import signal 
 import zenoh 
-
+import ctypes
 ap = argparse.ArgumentParser()
 ap.add_argument("-z", "--zenohd", required=True,
                 help="ip:port for the zenoh broker")
 
 args = vars(ap.parse_args())
 
-def callback(rname, data, length, info):
+def callback(rname, data, length, info):    
     print('Received {} bytes of data for resource {} with encoding {}'.format(length, rname, info.encoding))
+    
+    print('{}'.format(type(data)))    
+    print('{}'.format(type(data.contents)))    
+
+    print('content type = {}'.format(data.contents))
+    print('content type = {}'.format(data[:(length)]))
+    for i in range(0,length):
+        print('{}: {:02x}'.format(i, data[i][0]))
+    
 
 if __name__ == '__main__':    
     z = zenoh.Zenoh(args['zenohd'], 'user'.encode(), 'password'.encode())
