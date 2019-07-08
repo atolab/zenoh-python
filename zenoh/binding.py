@@ -137,11 +137,12 @@ ZENOH_QUERY_HANDLER_PROTO = CFUNCTYPE(c_void_p, c_char_p, c_char_p, POINTER(c_in
 def z_subscriber_trampoline_callback(rid, data, length, info, arg):
   global subscriberCallbackMap
   key = arg.contents.value  
+  print('Looking up handler for hash {}'.format(key))
   _, callback = subscriberCallbackMap[key]  
   if rid.contents.kind == Z_STR_RES_ID:          
     callback(rid.contents.id.rname.decode(), data, length, info.contents)
   else:
-    print('WARNING: Received data for unknown  resource name, rid = {}'.forma(rid.id.rid))
+    print('WARNING: Received data for unknown  resource name, rid = {}'.format(rid.id.rid))
 
 @ZENOH_REPLY_CALLBACK_PROTO
 def z_reply_trampoline_callback(reply_value, arg):
@@ -153,22 +154,31 @@ def z_reply_trampoline_callback(reply_value, arg):
 @ZENOH_QUERY_HANDLER_PROTO
 def z_query_handler_trampoline(rname, predicate, arg):
   global queryHandlerMap
-  key = arg.content.value
+  key = arg.contents.value
   _, handler = queryHandlerMap[key]
   replies =  handler(rname, predicate)
   l = len(replies)
-  rs = z_resource_t * l  
-  p_res_array = POINTER(z_array_resource_t)
-  p_res_array.contents =  z_array_resource_t(l, rs)
+  z_resource_t * l
+  rs = cast((z_resource_t * l)(), POINTER(z_resource_t))  
+  print(type(rs))
+  p_res_array = POINTER(z_array_resource_t)()
+  p_res_array.contents = z_array_resource_t()
+  p_res_array.contents.length = l
+  p_res_array.contents.elem =  rs
+  print('Step 0')
   i = 0
-  for (k,v) in replies:
+  for (k,v) in replies:    
     rs[i].rname = k.encode()
     rs[i].data = v
     rs[i].length = len(v)
     rs[i].encoding = 0
     rs[i].kind = 0
+    i += 1
+    print('Step {}'.format(i))
   
-  return p_res_array
+  print('Returning...')
+  # return cast(p_res_array, c_void_p)
+  return cast(None, c_void_p)
 
 @ZENOH_REPLY_CLEANER_PROTO
 def z_no_op_reply_cleaner(replies, args):

@@ -107,8 +107,9 @@ class Zenoh(object):
         k.contents = c_int64()
         k.contents.value = h                
         r = self.zlib.z_declare_storage(self.zenoh, resource.encode(), z_subscriber_trampoline_callback, z_query_handler_trampoline, z_no_op_reply_cleaner, k)
-        subscriberCallbackMap[h] = subscriber_callback
-        queryHandlerMap[h] = query_handler
+        print('Registering Storage handler with hash: {} -- {}'.format(h, k.contents.value))
+        subscriberCallbackMap[h] = (k, subscriber_callback)
+        queryHandlerMap[h] = (k, query_handler)
         if r.tag == 0:
             return r.value.sto
         else:
