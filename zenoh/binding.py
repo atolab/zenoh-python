@@ -131,13 +131,12 @@ ZENOH_ON_DISCONNECT_CALLBACK_PROTO = CFUNCTYPE(None, c_void_p)
 ZENOH_SUBSCRIBER_CALLBACK_PROTO = CFUNCTYPE(None, POINTER(z_resource_id_t), CHAR_PTR, c_uint, POINTER(z_data_info_t), POINTER(c_int64))
 ZENOH_REPLY_CALLBACK_PROTO = CFUNCTYPE(None, POINTER(z_reply_value_t), POINTER(c_int64))
 ZENOH_REPLY_CLEANER_PROTO = CFUNCTYPE(None, z_array_resource_t, POINTER(c_int64))
-ZENOH_QUERY_HANDLER_PROTO = CFUNCTYPE(c_void_p, c_char_p, c_char_p, POINTER(c_int64))
+ZENOH_QUERY_HANDLER_PROTO = CFUNCTYPE(None, c_char_p, c_char_p, POINTER(z_array_resource_t), POINTER(c_int64))
 
 @ZENOH_SUBSCRIBER_CALLBACK_PROTO
 def z_subscriber_trampoline_callback(rid, data, length, info, arg):
   global subscriberCallbackMap
   key = arg.contents.value  
-  print('Looking up handler for hash {}'.format(key))
   _, callback = subscriberCallbackMap[key]  
   if rid.contents.kind == Z_STR_RES_ID:          
     callback(rid.contents.id.rname.decode(), data, length, info.contents)
@@ -152,34 +151,28 @@ def z_reply_trampoline_callback(reply_value, arg):
   callback(reply_value.contents)
 
 @ZENOH_QUERY_HANDLER_PROTO
-def z_query_handler_trampoline(rname, predicate, arg):
+def z_query_handler_trampoline(rname, predicate, p_replies, arg):
   global queryHandlerMap
   key = arg.contents.value
   _, handler = queryHandlerMap[key]
-  replies =  handler(rname, predicate)
-  l = len(replies)
-  z_resource_t * l
-  rs = cast((z_resource_t * l)(), POINTER(z_resource_t))  
-  print(type(rs))
+  kvs =  handler(rname.decode(), predicate.decode())
+  l = len(kvs)
+  replies = p_replies.contents  
+  rs = cast((z_resource_t * l)(), POINTER(z_resource_t))    
   p_res_array = POINTER(z_array_resource_t)()
   p_res_array.contents = z_array_resource_t()
-  p_res_array.contents.length = l
-  p_res_array.contents.elem =  rs
-  print('Step 0')
+  replies.length = l
+  replies.elem =  rs  
   i = 0
-  for (k,v) in replies:    
+  for k,v in kvs:    
+    (d, l), info = v
     rs[i].rname = k.encode()
-    rs[i].data = v
-    rs[i].length = len(v)
-    rs[i].encoding = 0
-    rs[i].kind = 0
-    i += 1
-    print('Step {}'.format(i))
+    rs[i].data = d
+    rs[i].length = l
+    rs[i].encoding = info.encoding
+    rs[i].kind = info.kind
+    i += 1    
   
-  print('Returning...')
-  # return cast(p_res_array, c_void_p)
-  return cast(None, c_void_p)
-
 @ZENOH_REPLY_CLEANER_PROTO
 def z_no_op_reply_cleaner(replies, args):
   return

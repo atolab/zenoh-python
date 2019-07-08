@@ -13,10 +13,14 @@ store =  {}
 
 def insert_handler(rname, data, length, info):
   print('Inserting data for resource: {}'.format(rname))
-  store[rname] = (data, length, info)
+  store[rname] = ((data, length), info)
 
 def query_handler(path_selector, content_selector):  
-  return []
+  reply = []
+  for k,v in store.items():
+    if zenoh.Zenoh.intersect(path_selector, k):
+      reply.append((k,v))
+  return reply
 
 if __name__ == '__main__':    
     z = zenoh.Zenoh(args['zenohd'], 'user'.encode(), 'password'.encode())

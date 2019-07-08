@@ -25,9 +25,10 @@ class SubscriberMode(object):
     return SubscriberMode(SubscriberMode.Z_PUSH_MODE, None)
 
 
-class Zenoh(object):   
+class Zenoh(object): 
+    zenoh_native_lib = CDLL(zenoh_lib_path)     
     def __init__(self,  locator, uid = None, pwd = None):                                                  
-        self.zlib =  CDLL(zenoh_lib_path)
+        self.zlib =  Zenoh.zenoh_native_lib        
                 
         self.zlib.z_open_wup.restype = z_zenoh_p_result_t
         self.zlib.z_open_wup.argtypes = [c_char_p, c_char_p, c_char_p]
@@ -73,8 +74,9 @@ class Zenoh(object):
 
         self.zlib.z_start_recv_loop(self.zenoh)
 
-    def intersect(self, a, b):
-        if self.zlib.intersect(a.encode(), b.encode()) == 1:
+    @staticmethod
+    def intersect( a, b):
+        if Zenoh.zenoh_native_lib.intersect(a.encode(), b.encode()) == 1:
             return True
         else: 
             return False
@@ -107,7 +109,6 @@ class Zenoh(object):
         k.contents = c_int64()
         k.contents.value = h                
         r = self.zlib.z_declare_storage(self.zenoh, resource.encode(), z_subscriber_trampoline_callback, z_query_handler_trampoline, z_no_op_reply_cleaner, k)
-        print('Registering Storage handler with hash: {} -- {}'.format(h, k.contents.value))
         subscriberCallbackMap[h] = (k, subscriber_callback)
         queryHandlerMap[h] = (k, query_handler)
         if r.tag == 0:
