@@ -35,7 +35,7 @@ class Zenoh(object):
         self.zlib.z_open_wup.argtypes = [c_char_p, c_char_p, c_char_p]
 
         self.zlib.z_declare_subscriber.restype = z_sub_p_result_t
-        self.zlib.z_declare_subscriber.argtypes = [c_void_p, c_char_p, POINTER(z_sub_mode_t), c_void_p]
+        self.zlib.z_declare_subscriber.argtypes = [c_void_p, c_char_p, POINTER(z_sub_mode_t), ZENOH_SUBSCRIBER_CALLBACK_PROTO, POINTER(c_int64)]
 
         self.zlib.z_declare_publisher.restype = z_pub_p_result_t
         self.zlib.z_declare_publisher.argtypes = [c_void_p, c_char_p]
@@ -57,6 +57,9 @@ class Zenoh(object):
 
         self.zlib.z_write_data_wo.restype = c_int 
         self.zlib.z_write_data_wo.argtypes = [c_void_p, c_char_p, c_char_p, c_int, c_uint8, c_uint8]
+        # int z_query(z_zenoh_t *z, const char* resource, const char* predicate, z_reply_callback_t callback, void *arg);
+        self.zlib.z_query.restype = c_int
+        self.zlib.z_query.argtypes = [c_void_p, c_char_p, c_char_p, ZENOH_REPLY_CALLBACK_PROTO, POINTER(c_int64)]
 
         self.zenoh = self.zlib.z_open_wup(locator.encode(), uid, pwd).value.zenoh
         
@@ -98,6 +101,28 @@ class Zenoh(object):
         l = len(data)
         self.zlib.z_stream_data(pub, data, l)        
 
+    def write_data_wo(self, resource, data, encoding, kind):
+        l = len(data)
+        self.zlib.z_write_data(self.zenoh, resource, data, l, 0, Z_PUT)
+
+    def write_data(self, resource, data):
+        self.write_data_wo(resource, data, 0, Z_PUT)
+
+    def query(self, resource, predicate, callback):
+        global replyCallbackMap        
+        h = hash(callback)
+        k = POINTER(c_int64)()
+        k.contents = c_int64()
+        k.contents.value = h        
+        r = self.zlib.z_query(self.zenoh, resource.encode(), predicate.encode(), z_reply_trampoline_callback, k)
+        replyCallbackMap[h] = (k, callback)        
+        if r.tag == 0:
+            return r.value.sub
+        else:            
+            del replyCallbackMap[h]
+            raise 'Unable to create query'        
+
+      
     def close(self):        
         pass
 
