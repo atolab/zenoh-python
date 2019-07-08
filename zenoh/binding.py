@@ -100,13 +100,16 @@ class z_reply_value_t(Structure):
 
 
 ZENOH_ON_DISCONNECT_CALLBACK_PROTO = CFUNCTYPE(None, c_void_p)
-ZENOH_SUBSCRIBER_CALLBACK_PROTO = CFUNCTYPE(None, z_resource_id_t, CHAR_PTR, c_uint, z_data_info_t)
-ZENOH_REPLY_CALLBACK = CFUNCTYPE(None, z_reply_value_t)
+ZENOH_SUBSCRIBER_CALLBACK_PROTO = CFUNCTYPE(None, POINTER(z_resource_id_t), CHAR_PTR, c_uint, POINTER(z_data_info_t), c_void_p)
+ZENOH_REPLY_CALLBACK = CFUNCTYPE(None, POINTER(z_reply_value_t), c_void_p)
 
 class SubscriberCallback(object):
     def __init__(self, callback):
-        self.callback = callback
+        self.cback = callback
+        
+    def notify(self, rid, data, length):      
+      self.cback(rid, data, length)
 
-    @ZENOH_SUBSCRIBER_CALLBACK_PROTO
-    def trampoline_callback(self, rid, data, length):
-        self.callback(rid, data, length, None)
+@ZENOH_SUBSCRIBER_CALLBACK_PROTO
+def z_subscriber_trampoline_callback(rid, data, length, arg):
+  arg(rid, data, length)

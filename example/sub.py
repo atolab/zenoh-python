@@ -9,7 +9,8 @@ ap.add_argument("-z", "--zenohd", required=True,
 
 args = vars(ap.parse_args())
 
-def listener(rid, data, length, info):
+@zenoh.ZENOH_SUBSCRIBER_CALLBACK_PROTO
+def callback(rid, data, length, info):
     print('Received {} bytes of data'.format(length))
 
 if __name__ == '__main__':    
@@ -18,5 +19,5 @@ if __name__ == '__main__':
     
     print('Declaring Subscriber for {}', r_name)
     
-    pub = z.declare_subscriber(r_name, zenoh.SubscriberMode.push(), listener)
+    pub = z.declare_subscriber(r_name, zenoh.SubscriberMode.push(), callback)
     time.sleep(60)

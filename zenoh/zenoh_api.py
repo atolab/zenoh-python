@@ -35,7 +35,7 @@ class Zenoh(object):
         self.zlib.z_open_wup.argtypes = [c_char_p, c_char_p, c_char_p]
 
         self.zlib.z_declare_subscriber.restype = z_sub_p_result_t
-        self.zlib.z_declare_subscriber.argtypes = [c_void_p, c_char_p, POINTER(z_sub_mode_t), ZENOH_SUBSCRIBER_CALLBACK_PROTO]
+        self.zlib.z_declare_subscriber.argtypes = [c_void_p, c_char_p, POINTER(z_sub_mode_t), c_void_p]
 
         self.zlib.z_declare_publisher.restype = z_pub_p_result_t
         self.zlib.z_declare_publisher.argtypes = [c_void_p, c_char_p]
@@ -74,11 +74,9 @@ class Zenoh(object):
         else:
             raise 'Unable to create publisher'
 
-    def declare_subscriber(self, res_name, sub_mode, callback):
-        print('Submode: {}'.format(sub_mode.z_sm.kind))
-        listener = SubscriberCallback(callback)      
-        tcb = listener.trampoline_callback;        
-        r = self.zlib.z_declare_subscriber(self.zenoh, res_name.encode(), byref(sub_mode.z_sm), tcb)
+    def declare_subscriber(self, res_name, sub_mode, callback):        
+        arg = SubscriberCallback(callback)              
+        r = self.zlib.z_declare_subscriber(self.zenoh, res_name.encode(), byref(sub_mode.z_sm), z_subscriber_trampoline_callback, c_void_p(byref(arg)))
         if r.tag == 0:
             return r.value.sub
         else:
