@@ -106,7 +106,7 @@ class Zenoh(object):
         k = POINTER(c_int64)()
         k.contents = c_int64()
         k.contents.value = h                
-        r = self.zlib.z_declare_storage(self.zenoh, z_subscriber_trampoline_callback, z_query_handler_trampoline, z_no_op_reply_cleaner, k)
+        r = self.zlib.z_declare_storage(self.zenoh, resource.encode(), z_subscriber_trampoline_callback, z_query_handler_trampoline, z_no_op_reply_cleaner, k)
         subscriberCallbackMap[h] = subscriber_callback
         queryHandlerMap[h] = query_handler
         if r.tag == 0:
@@ -126,7 +126,7 @@ class Zenoh(object):
 
     def write_data_wo(self, resource, data, encoding, kind):
         l = len(data)
-        self.zlib.z_write_data(self.zenoh, resource, data, l, encoding, kind)
+        self.zlib.z_write_data(self.zenoh, resource.encode(), data, l, encoding, kind)
 
     def write_data(self, resource, data):
         self.write_data_wo(resource, data, 0, Z_PUT)
