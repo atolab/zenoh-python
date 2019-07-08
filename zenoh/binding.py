@@ -11,6 +11,10 @@ Z_PUT       = 0x00
 Z_UPDATE    = 0x01
 Z_REMOVE    = 0x02
 
+Z_STORAGE_DATA = 0x00
+Z_STORAGE_FINAL = 0x01 
+Z_REPLY_FINAL = 0x02 
+
 subscriberCallbackMap = {}
 replyCallbackMap = {}
 
@@ -118,4 +122,4 @@ def z_reply_trampoline_callback(reply_value, arg):
   global replyCallbackMap
   key = arg.contents.value  
   _, callback = replyCallbackMap[key]  
-  callback(reply_value)
+  callback(reply_value.contents)

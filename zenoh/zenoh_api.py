@@ -116,9 +116,7 @@ class Zenoh(object):
         k.contents.value = h        
         r = self.zlib.z_query(self.zenoh, resource.encode(), predicate.encode(), z_reply_trampoline_callback, k)
         replyCallbackMap[h] = (k, callback)        
-        if r.tag == 0:
-            return r.value.sub
-        else:            
+        if r != 0:            
             del replyCallbackMap[h]
             raise 'Unable to create query'        
 
