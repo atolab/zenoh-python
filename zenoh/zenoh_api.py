@@ -31,7 +31,7 @@ class Zenoh(object):
     def __init__(self,  locator, uid = None, pwd = None):                                                  
         self.zlib =  CDLL(zenoh_lib_path)
                 
-        self.zlib.z_open_wup.restype = c_void_p
+        self.zlib.z_open_wup.restype = z_zenoh_p_result_t
         self.zlib.z_open_wup.argtypes = [c_char_p, c_char_p, c_char_p]
 
         self.zlib.z_declare_subscriber.restype = z_sub_p_result_t
@@ -58,7 +58,7 @@ class Zenoh(object):
         self.zlib.z_write_data_wo.restype = c_int 
         self.zlib.z_write_data_wo.argtypes = [c_void_p, c_char_p, c_char_p, c_int, c_uint8, c_uint8]
 
-        self.zenoh = self.zlib.z_open_wup(locator.encode(), uid, pwd)
+        self.zenoh = self.zlib.z_open_wup(locator.encode(), uid, pwd).value.zenoh
         
         if self.zenoh != None:
             self.connected = True
