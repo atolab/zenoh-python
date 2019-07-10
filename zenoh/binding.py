@@ -105,11 +105,11 @@ CHAR_PTR = POINTER(c_char)
 class z_reply_value_t(Structure):
   _fields_ = [
     ('kind', c_uint8), 
-    ('stoid', CHAR_PTR),
+    ('stoid', c_char_p),
     ('stoid_length', c_size_t),
     ('rsn', c_uint32), 
     ('rname', c_char_p),
-    ('data', CHAR_PTR),
+    ('data', c_char_p),
     ('data_length', c_size_t),
     ('info', z_data_info_t)]
 
@@ -135,7 +135,7 @@ class QueryReply(object):
 class z_resource_t(Structure):
   _fields_ = [
     ('rname', c_char_p),
-    ('data', CHAR_PTR),
+    ('data', c_char_p),
     ('length', c_size_t),
     ('encoding', c_ushort),
     ('kind', c_ushort)
@@ -177,23 +177,24 @@ def z_query_handler_trampoline(rname, predicate, p_replies, arg):
   _, handler = queryHandlerMap[key]
   kvs =  handler(rname.decode(), predicate.decode())
   l = len(kvs)
-  replies = p_replies.contents  
-  rs = cast((z_resource_t * l)(), POINTER(z_resource_t))    
-  p_res_array = POINTER(z_array_resource_t)()
-  p_res_array.contents = z_array_resource_t()
-  replies.length = l
-  replies.elem =  rs  
+  p_replies.contents.length = l
+  p_replies.contents.elem = cast((z_resource_t * l)(), POINTER(z_resource_t))    
   i = 0
-  for k,v in kvs:    
+  for k,v in kvs:        
     d, info = v
-    rs[i].rname = k.encode()
-    rs[i].data = create_string_buffer(d)
-    rs[i].length = len(d)
-    rs[i].encoding = info.encoding
-    rs[i].kind = info.kind
+    print('[{}]: ({}, {})'.format(i, k, d))
+    p_replies.contents.elem[i].rname = k.encode()
+    p_replies.contents.elem[i].data = d
+    p_replies.contents.elem[i].length = len(d)
+    p_replies.contents.elem[i].encoding = info.encoding
+    p_replies.contents.elem[i].kind = info.kind
     i += 1    
   
-  replyMap[key] = p_res_array.contents
+  replyMap[key] = p_replies.contents
+
 @ZENOH_REPLY_CLEANER_PROTO
 def z_no_op_reply_cleaner(replies, args):
+  print('Freeing reply for hash: {}'.format(key))
+  key = args.contents.value
+  del replyMap[key]
   return

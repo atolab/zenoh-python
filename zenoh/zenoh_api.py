@@ -28,7 +28,9 @@ class SubscriberMode(object):
 class Zenoh(object): 
     zenoh_native_lib = CDLL(zenoh_lib_path)     
     def __init__(self,  locator, uid = None, pwd = None):                                                  
-        self.zlib =  Zenoh.zenoh_native_lib        
+        assert(Zenoh.zenoh_native_lib is not None)
+
+        self.zlib =  Zenoh.zenoh_native_lib                
                 
         self.zlib.z_open_wup.restype = z_zenoh_p_result_t
         self.zlib.z_open_wup.argtypes = [c_char_p, c_char_p, c_char_p]
@@ -128,7 +130,7 @@ class Zenoh(object):
 
     def write_data_wo(self, resource, data, encoding, kind):
         l = len(data)
-        self.zlib.z_write_data(self.zenoh, resource.encode(), data, l, encoding, kind)
+        self.zlib.z_write_data_wo(self.zenoh, resource.encode(), data, l, encoding, kind)
 
     def write_data(self, resource, data):
         self.write_data_wo(resource, data, 0, Z_PUT)

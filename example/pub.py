@@ -23,6 +23,8 @@ def run_pub(locator):
         bs.append(len(msg))
         bs.extend(msg.encode())
         z.stream_data(pub, bytes(bs))
+        z.write_data('/demo/hello/ruby', bytes(bs))
+        z.write_data('/demo/hello/ruby', bytes(bs))
         count += 1
         time.sleep(0.5)
 
