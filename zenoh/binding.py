@@ -184,4 +184,5 @@ def z_query_handler_trampoline(rname, predicate, p_replies, arg):
     i += 1    
 @ZENOH_REPLY_CLEANER_PROTO
 def z_no_op_reply_cleaner(replies, args):
+  print('Free handler called!')
   return
