@@ -121,9 +121,15 @@ class QueryReply(object):
     self.kind = zrv.kind
     self.store_id = zrv.stoid[:zrv.stoid_length]
     self.sn = zrv.rsn
-    self.rname = zrv.rname.decode()
-    self.data = zrv.data[:zrv.data_length]
-    self.info = zrv.info
+    if zrv.rname is not None:
+      self.rname = zrv.rname.decode()
+      self.data = zrv.data[:zrv.data_length]
+      self.info = zrv.info
+    else:
+      self.rname = None
+      self.data = None
+      self.info = None
+    
 
 class z_resource_t(Structure):
   _fields_ = [
@@ -160,7 +166,7 @@ def z_subscriber_trampoline_callback(rid, data, length, info, arg):
 def z_reply_trampoline_callback(reply_value, arg):
   global replyCallbackMap
   key = arg.contents.value  
-  _, callback = replyCallbackMap[key]  
+  _, callback = replyCallbackMap[key]    
   callback(QueryReply(reply_value.contents))
 
 @ZENOH_QUERY_HANDLER_PROTO
