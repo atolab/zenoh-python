@@ -27,4 +27,4 @@ if __name__ == '__main__':
     print('Execuring query {}', selector)
     
     sub = z.query(selector, "", callback)
-    time.sleep(60)
+    time.sleep(5)

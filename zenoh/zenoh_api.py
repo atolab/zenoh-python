@@ -28,7 +28,9 @@ class SubscriberMode(object):
 class Zenoh(object): 
     zenoh_native_lib = CDLL(zenoh_lib_path)     
     def __init__(self,  locator, uid = None, pwd = None):                                                  
-        self.zlib =  Zenoh.zenoh_native_lib        
+        assert(Zenoh.zenoh_native_lib is not None)
+
+        self.zlib =  Zenoh.zenoh_native_lib                
                 
         self.zlib.z_open_wup.restype = z_zenoh_p_result_t
         self.zlib.z_open_wup.argtypes = [c_char_p, c_char_p, c_char_p]

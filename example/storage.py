@@ -19,6 +19,7 @@ def query_handler(path_selector, content_selector):
   reply = []
   for k,v in store.items():
     if zenoh.Zenoh.intersect(path_selector, k):
+      print('Responding to query with ({}, {})'.format(k, v))
       reply.append((k,v))
   return reply
 
