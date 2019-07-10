@@ -18,6 +18,7 @@ Z_REPLY_FINAL = 0x02
 subscriberCallbackMap = {}
 replyCallbackMap = {}
 queryHandlerMap = {}
+replyMap = {}
 
 def get_lib_ext():
     system = platform.system()
@@ -192,6 +193,7 @@ def z_query_handler_trampoline(rname, predicate, p_replies, arg):
     rs[i].kind = info.kind
     i += 1    
   
+  replyMap[key] = p_res_array.contents
 @ZENOH_REPLY_CLEANER_PROTO
 def z_no_op_reply_cleaner(replies, args):
   return

@@ -11,14 +11,14 @@ args = vars(ap.parse_args())
 
 def run_pub(locator):        
     z = zenoh.Zenoh(locator, 'user'.encode(), 'password'.encode())    
-    r_name = '/demo/hello/python'
+    r_name = '/demo/hello/piton'
     print('Declaring Publisher for {}', r_name)
     pub = z.declare_publisher(r_name)            
 
     count = 0
     for _ in range(1, 30):
         print('Sending data...')
-        msg = 'hello from python'
+        msg = 'Salut des pitone'
         bs = bytearray()
         bs.append(len(msg))
         bs.extend(msg.encode())
