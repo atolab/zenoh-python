@@ -178,11 +178,13 @@ def z_query_handler_trampoline(rname, predicate, p_replies, arg):
   kvs =  handler(rname.decode(), predicate.decode())
   l = len(kvs)
   p_replies.contents.length = l
-  p_replies.contents.elem = cast((z_resource_t * l)(), POINTER(z_resource_t))    
+  rs = (POINTER(z_resource_t) * l)()  
+  p_replies.contents.elem = cast(rs), POINTER(POINTER(z_resource_t))
   i = 0
   for k,v in kvs:        
     d, info = v
-    print('[{}]: ({}, {})'.format(i, k, d))
+    print('[{}]: ({}, {}:{})'.format(i, k, d, len(d)))
+    p_replies.contents.elem[i] = z_resource_t()
     p_replies.contents.elem[i].rname = k.encode()
     p_replies.contents.elem[i].data = d
     p_replies.contents.elem[i].length = len(d)
@@ -193,8 +195,8 @@ def z_query_handler_trampoline(rname, predicate, p_replies, arg):
   replyMap[key] = p_replies.contents
 
 @ZENOH_REPLY_CLEANER_PROTO
-def z_no_op_reply_cleaner(replies, args):
-  print('Freeing reply for hash: {}'.format(key))
+def z_no_op_reply_cleaner(replies, args):  
   key = args.contents.value
+  print('Freeing reply for hash: {}'.format(key))
   del replyMap[key]
   return
