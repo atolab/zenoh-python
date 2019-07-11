@@ -120,7 +120,10 @@ class QueryReply(object):
 
   def __init__(self, zrv):
     self.kind = zrv.kind
-    self.store_id = zrv.stoid[:zrv.stoid_length]
+    if zrv.stoid is not None:
+      self.store_id = zrv.stoid[:zrv.stoid_length]
+    else:
+      self.store_id = None
     self.sn = zrv.rsn
     if zrv.rname is not None:
       self.rname = zrv.rname.decode()
@@ -144,13 +147,13 @@ class z_resource_t(Structure):
 class z_array_resource_t(Structure):  
   _fields_ = [
     ('length', c_uint),
-    ('elem', POINTER(z_resource_t))]
+    ('elem', POINTER(POINTER(z_resource_t)))]
     
 
 ZENOH_ON_DISCONNECT_CALLBACK_PROTO = CFUNCTYPE(None, c_void_p)
 ZENOH_SUBSCRIBER_CALLBACK_PROTO = CFUNCTYPE(None, POINTER(z_resource_id_t), CHAR_PTR, c_uint, POINTER(z_data_info_t), POINTER(c_int64))
 ZENOH_REPLY_CALLBACK_PROTO = CFUNCTYPE(None, POINTER(z_reply_value_t), POINTER(c_int64))
-ZENOH_REPLY_CLEANER_PROTO = CFUNCTYPE(None, z_array_resource_t, POINTER(c_int64))
+ZENOH_REPLY_CLEANER_PROTO = CFUNCTYPE(None, POINTER(z_array_resource_t), POINTER(c_int64))
 ZENOH_QUERY_HANDLER_PROTO = CFUNCTYPE(None, c_char_p, c_char_p, POINTER(z_array_resource_t), POINTER(c_int64))
 
 @ZENOH_SUBSCRIBER_CALLBACK_PROTO
@@ -174,29 +177,30 @@ def z_reply_trampoline_callback(reply_value, arg):
 def z_query_handler_trampoline(rname, predicate, p_replies, arg):
   global queryHandlerMap
   key = arg.contents.value
+  print('Executing query for storage with hash: {}'.format(key))
   _, handler = queryHandlerMap[key]
   kvs =  handler(rname.decode(), predicate.decode())
   l = len(kvs)
   p_replies.contents.length = l
   rs = (POINTER(z_resource_t) * l)()  
-  p_replies.contents.elem = cast(rs), POINTER(POINTER(z_resource_t))
+  p_replies.contents.elem = cast(rs, POINTER(POINTER(z_resource_t)))
   i = 0
   for k,v in kvs:        
     d, info = v
     print('[{}]: ({}, {}:{})'.format(i, k, d, len(d)))
-    p_replies.contents.elem[i] = z_resource_t()
-    p_replies.contents.elem[i].rname = k.encode()
-    p_replies.contents.elem[i].data = d
-    p_replies.contents.elem[i].length = len(d)
-    p_replies.contents.elem[i].encoding = info.encoding
-    p_replies.contents.elem[i].kind = info.kind
+    p_replies.contents.elem[i].contents = z_resource_t()
+    p_replies.contents.elem[i].contents.rname = k.encode()
+    p_replies.contents.elem[i].contents.data = d
+    p_replies.contents.elem[i].contents.length = len(d)
+    p_replies.contents.elem[i].contents.encoding = info.encoding
+    p_replies.contents.elem[i].contents.kind = info.kind
     i += 1    
   
   replyMap[key] = p_replies.contents
+  print('Done responding query...')
 
 @ZENOH_REPLY_CLEANER_PROTO
 def z_no_op_reply_cleaner(replies, args):  
   key = args.contents.value
-  print('Freeing reply for hash: {}'.format(key))
   del replyMap[key]
   return
