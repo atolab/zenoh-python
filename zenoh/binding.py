@@ -120,19 +120,19 @@ class QueryReply(object):
 
   def __init__(self, zrv):
     self.kind = zrv.kind
-    if zrv.stoid is not None:
+    self.store_id = None
+    self.rname = None
+    self.data = None
+    self.info = None
+    
+    if self.kind == QueryReply.STORAGE_DATA:
       self.store_id = zrv.stoid[:zrv.stoid_length]
-    else:
-      self.store_id = None
-    self.sn = zrv.rsn
-    if zrv.rname is not None:
       self.rname = zrv.rname.decode()
       self.data = zrv.data[:zrv.data_length]
       self.info = zrv.info
-    else:
-      self.rname = None
-      self.data = None
-      self.info = None
+
+    elif self.kind == QueryReply.STORAGE_FINAL:
+      self.store_id = zrv.stoid[:zrv.stoid_length]
     
 
 class z_resource_t(Structure):
@@ -177,7 +177,6 @@ def z_reply_trampoline_callback(reply_value, arg):
 def z_query_handler_trampoline(rname, predicate, p_replies, arg):
   global queryHandlerMap
   key = arg.contents.value
-  print('Executing query for storage with hash: {}'.format(key))
   _, handler = queryHandlerMap[key]
   kvs =  handler(rname.decode(), predicate.decode())
   l = len(kvs)
@@ -197,7 +196,6 @@ def z_query_handler_trampoline(rname, predicate, p_replies, arg):
     i += 1    
   
   replyMap[key] = p_replies.contents
-  print('Done responding query...')
 
 @ZENOH_REPLY_CLEANER_PROTO
 def z_no_op_reply_cleaner(replies, args):  

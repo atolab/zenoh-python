@@ -11,13 +11,14 @@ args = vars(ap.parse_args())
 
 
 def callback(reply):  
+  print('Callback called')
   if reply.kind == zenoh.QueryReply.STORAGE_DATA:
     print('Received: ({}, {}) '.format(reply.rname, reply.data))
     
   elif reply.kind == zenoh.Z_STORAGE_FINAL:
     print('Received storage final')
   else:
-    print('Received Reply final')
+    print('Received Reply final')    
     
 
 if __name__ == '__main__':    
@@ -26,7 +27,8 @@ if __name__ == '__main__':
     
     print('Execuring query {}', selector)
     
-    while True:
-      z.query(selector, "", callback)
-      time.sleep(1)
     
+    z.query(selector, "", callback)
+
+    time.sleep(2)
+  
