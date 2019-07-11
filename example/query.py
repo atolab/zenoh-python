@@ -18,7 +18,7 @@ def callback(reply):
     print('Received storage final')
   else:
     print('Received Reply final')
-    exit(0)
+    
 
 if __name__ == '__main__':    
     z = zenoh.Zenoh(args['zenohd'], 'user'.encode(), 'password'.encode())
@@ -26,5 +26,7 @@ if __name__ == '__main__':
     
     print('Execuring query {}', selector)
     
-    sub = z.query(selector, "", callback)
-    time.sleep(5)
+    while True:
+      z.query(selector, "", callback)
+      time.sleep(1)
+    
