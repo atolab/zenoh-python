@@ -6,27 +6,26 @@ import signal
 ap = argparse.ArgumentParser()
 ap.add_argument("-z", "--zenohd", required=True,
                 help="ip:port for the zenoh broker")
+ap.add_argument("-s", "--size", required=True,
+                help="payload size")
 
 args = vars(ap.parse_args())
 
 def run_pub(locator):        
     z = zenoh.Zenoh(locator, 'user'.encode(), 'password'.encode())    
-    r_name = '/demo/hello/piton'
+    r_name = '/test/thr'
     print('Declaring Publisher for {}', r_name)
     pub = z.declare_publisher(r_name)            
 
     count = 0
-    for _ in range(1, 30):
-        print('Sending data...')
-        msg = 'Salut des pitone'
-        bs = bytearray()
-        bs.append(len(msg))
-        bs.extend(msg.encode())
-        z.stream_data(pub, bytes(bs))
-        z.write_data('/demo/hello/ruby', bytes(bs))
-        z.write_data('/demo/hello/ruby', bytes(bs))
-        count += 1
-        time.sleep(0.5)
+    size = int(args['size'])    
+    bs = bytearray()
+    for i in range(0,size):
+        bs.append(i % 256)
+
+    while True:        
+        z.stream_data(pub, bytes(bs))        
+        
 
     z.close()
 
