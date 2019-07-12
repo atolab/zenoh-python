@@ -1,5 +1,10 @@
 from .binding import *
 
+
+Z_INFO_PID_KEY      = 0
+Z_INFO_PEER_KEY     = 1
+Z_INFO_PEER_PID_KEY = 2
+
 class SubscriberMode(object):
   Z_PUSH_MODE = 1
   Z_PULL_MODE = 2
@@ -31,9 +36,15 @@ class Zenoh(object):
         assert(Zenoh.zenoh_native_lib is not None)
 
         self.zlib =  Zenoh.zenoh_native_lib                
-                
+
         self.zlib.z_open_wup.restype = z_zenoh_p_result_t
         self.zlib.z_open_wup.argtypes = [c_char_p, c_char_p, c_char_p]
+
+        self.zlib.z_info.restype = z_vec_t
+        self.zlib.z_info.argtypes = [c_void_p]
+
+        self.zlib.z_vec_get.restype = c_void_p
+        self.zlib.z_vec_get.argtypes = [POINTER(z_vec_t), c_uint]
 
         self.zlib.z_declare_subscriber.restype = z_sub_p_result_t
         self.zlib.z_declare_subscriber.argtypes = [c_void_p, c_char_p, POINTER(z_sub_mode_t), ZENOH_SUBSCRIBER_CALLBACK_PROTO, POINTER(c_int64)]
@@ -75,6 +86,15 @@ class Zenoh(object):
             raise 'Unable to open zenoh session!'
 
         self.zlib.z_start_recv_loop(self.zenoh)
+
+    def info(self):
+        ps = self.zlib.z_info(self.zenoh)
+        res = {}
+        for i in range(0, ps.length_):
+            prop = cast(self.zlib.z_vec_get(pointer(ps), i), POINTER(z_property_t))
+            val = prop[0].value
+            res[i] = val.elem[:val.length]
+        return res
 
     @staticmethod
     def intersect( a, b):
