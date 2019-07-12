@@ -105,11 +105,11 @@ CHAR_PTR = POINTER(c_char)
 class z_reply_value_t(Structure):
   _fields_ = [
     ('kind', c_uint8), 
-    ('stoid', c_char_p),
+    ('stoid', CHAR_PTR),
     ('stoid_length', c_size_t),
     ('rsn', c_uint32), 
     ('rname', c_char_p),
-    ('data', c_char_p),
+    ('data', CHAR_PTR),
     ('data_length', c_size_t),
     ('info', z_data_info_t)]
 
@@ -118,7 +118,7 @@ class QueryReply(object):
   STORAGE_FINAL = 0x01 
   REPLY_FINAL = 0x02 
 
-  def __init__(self, zrv):
+  def __init__(self, zrv):    
     self.kind = zrv.kind
     self.store_id = None
     self.rname = None
@@ -134,11 +134,12 @@ class QueryReply(object):
     elif self.kind == QueryReply.STORAGE_FINAL:
       self.store_id = zrv.stoid[:zrv.stoid_length]
     
+    
 
 class z_resource_t(Structure):
   _fields_ = [
     ('rname', c_char_p),
-    ('data', c_char_p),
+    ('data', CHAR_PTR),
     ('length', c_size_t),
     ('encoding', c_ushort),
     ('kind', c_ushort)
@@ -170,8 +171,9 @@ def z_subscriber_trampoline_callback(rid, data, length, info, arg):
 def z_reply_trampoline_callback(reply_value, arg):
   global replyCallbackMap
   key = arg.contents.value  
-  _, callback = replyCallbackMap[key]    
-  callback(QueryReply(reply_value.contents))
+  _, callback = replyCallbackMap[key] 
+  qr = QueryReply(reply_value.contents)   
+  callback(qr)
 
 @ZENOH_QUERY_HANDLER_PROTO
 def z_query_handler_trampoline(rname, predicate, p_replies, arg):
@@ -186,7 +188,6 @@ def z_query_handler_trampoline(rname, predicate, p_replies, arg):
   i = 0
   for k,v in kvs:        
     d, info = v
-    print('[{}]: ({}, {}:{})'.format(i, k, d, len(d)))
     p_replies.contents.elem[i].contents = z_resource_t()
     p_replies.contents.elem[i].contents.rname = k.encode()
     p_replies.contents.elem[i].contents.data = d
