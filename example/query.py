@@ -11,11 +11,7 @@ args = vars(ap.parse_args())
 
 
 def callback(reply):  
-<<<<<<< HEAD
-  if reply.kind == zenoh.QueryReply.STORAGE_DATA:    
-=======
   if reply.kind == zenoh.QueryReply.STORAGE_DATA:
->>>>>>> b009e50863da8ac4754f7d8cffcbd5129b790bc3
     print('Received: ({}, {}) '.format(reply.rname, reply.data))
     
   elif reply.kind == zenoh.Z_STORAGE_FINAL:
