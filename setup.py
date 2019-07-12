@@ -9,7 +9,7 @@ def read(fname):
 setup(
     name='zenoh',
     version='0.2.0',
-    packages=['zenoh', ],
+    packages=['zenoh'],
     author='kydos',
     description="Python client API for zenoh",
     long_description=read('README.md'),
@@ -18,7 +18,7 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",        
         "Intended Audience :: Developers",
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 2 - Beta",
         "Topic :: System :: Networking",
         'License :: OSI Approved :: Apache Software License',
         'License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)',        

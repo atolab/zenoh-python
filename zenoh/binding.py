@@ -15,6 +15,9 @@ Z_STORAGE_DATA = 0x00
 Z_STORAGE_FINAL = 0x01 
 Z_REPLY_FINAL = 0x02 
 
+Z_OK_TAG = 0
+Z_ERROR_TAG = 1
+
 subscriberCallbackMap = {}
 replyCallbackMap = {}
 queryHandlerMap = {}

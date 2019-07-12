@@ -78,12 +78,12 @@ class Zenoh(object):
         self.zlib.intersect.restype = c_int 
         self.zlib.intersect.argtypes = [c_char_p, c_char_p]
 
-        self.zenoh = self.zlib.z_open_wup(locator.encode(), uid, pwd).value.zenoh
-        
-        if self.zenoh != None:
+        r = self.zlib.z_open_wup(locator.encode(), uid, pwd)
+        if r.tag == Z_OK_TAG:
+            self.zenoh = self.zlib.z_open_wup(locator.encode(), uid, pwd).value.zenoh
             self.connected = True
-        else:
-            raise 'Unable to open zenoh session!'
+        else:        
+            raise Exception('Unable to open zenoh session (error code: {}).'.format(r.value.error))
 
         self.zlib.z_start_recv_loop(self.zenoh)
 
@@ -108,7 +108,7 @@ class Zenoh(object):
         if r.tag == 0:
             return r.value.pub
         else:
-            raise 'Unable to create publisher'
+            raise Exception('Unable to create publisher')
 
     def declare_subscriber(self, res_name, sub_mode, callback):        
         global subscriberCallbackMap        
@@ -122,7 +122,7 @@ class Zenoh(object):
             return r.value.sub
         else:            
             del subscriberCallbackMap[h]
-            raise 'Unable to create subscriber'
+            raise Exception('Unable to create subscriber')
         
     def declare_storage(self, resource, subscriber_callback, query_handler):
         global replyCallbackMap
@@ -165,7 +165,7 @@ class Zenoh(object):
         replyCallbackMap[h] = (k, callback)        
         if r != 0:            
             del replyCallbackMap[h]
-            raise 'Unable to create query'        
+            raise Exception('Unable to create query')
 
       
     def close(self):        
