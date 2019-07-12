@@ -11,7 +11,6 @@ args = vars(ap.parse_args())
 
 
 def callback(reply):  
-  print('Callback called')
   if reply.kind == zenoh.QueryReply.STORAGE_DATA:
     print('Received: ({}, {}) '.format(reply.rname, reply.data))
     

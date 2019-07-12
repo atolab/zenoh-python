@@ -77,6 +77,8 @@ class z_sto_p_result_union_t(Union):
 class z_sto_p_result_t(Structure):
   _fields_ = [('tag', c_int), ('value', z_sto_p_result_union_t)]
 
+class z_vec_t(Structure):
+  _fields_ = [('capacity_', c_int), ('length_', c_int), ('elem_', c_void_p)]
 
 # Resource Id
 class z_res_id_t(Union):
@@ -95,10 +97,17 @@ class z_data_info_t(Structure):
 class z_temporal_property_t(Structure):
     _fields_ = [('origin', c_int), ('period', c_int),('duration', c_int)] 
 
-
 class z_sub_mode_t(Structure):
   _fields_ = [('kind', c_uint8), ('tprop', z_temporal_property_t)]
 
+# properties  
+class z_array_uint8_t(Structure):
+  _fields_ = [
+    ('length', c_uint),
+    ('elem', POINTER(c_char))]
+
+class z_property_t(Structure):
+  _fields_ = [('id', c_size_t), ('value', z_array_uint8_t)]
 
 CHAR_PTR = POINTER(c_char)
 # zenoh-c callbacks
