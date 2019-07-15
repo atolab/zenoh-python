@@ -141,7 +141,10 @@ class QueryReply(object):
       self.store_id = zrv.stoid[:zrv.stoid_length]
       self.rname = zrv.rname.decode()
       self.data = zrv.data[:zrv.data_length]
-      self.info = zrv.info
+      self.info = z_data_info_t()
+      self.info.flags = zrv.info.flags
+      self.info.encoding = zrv.info.encoding
+      self.info.kind = zrv.info.kind
 
     elif self.kind == QueryReply.STORAGE_FINAL:
       self.store_id = zrv.stoid[:zrv.stoid_length]

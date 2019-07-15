@@ -181,9 +181,15 @@ class Zenoh(object):
         k = POINTER(c_int64)()
         k.contents = c_int64()
         k.contents.value = h                
-        r = self.zlib.z_declare_storage(self.zenoh, selector.encode(), z_subscriber_trampoline_callback, z_query_handler_trampoline, z_no_op_reply_cleaner, k)
         subscriberCallbackMap[h] = (k, subscriber_callback)
         queryHandlerMap[h] = (k, query_handler)
+        r = self.zlib.z_declare_storage(
+            self.zenoh, 
+            selector.encode(), 
+            z_subscriber_trampoline_callback, 
+            z_query_handler_trampoline, 
+            z_no_op_reply_cleaner, 
+            k)
         if r.tag == 0:
             return r.value.sto
         else:
@@ -252,8 +258,8 @@ class Zenoh(object):
         k = POINTER(c_int64)()
         k.contents = c_int64()
         k.contents.value = h        
-        r = self.zlib.z_query(self.zenoh, resource.encode(), predicate.encode(), z_reply_trampoline_callback, k)
         replyCallbackMap[h] = (k, callback)        
+        r = self.zlib.z_query(self.zenoh, resource.encode(), predicate.encode(), z_reply_trampoline_callback, k)
         if r != 0:            
             del replyCallbackMap[h]
             raise Exception('Unable to create query')
