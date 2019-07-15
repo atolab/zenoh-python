@@ -151,7 +151,7 @@ class QueryReply(object):
 class z_resource_t(Structure):
   _fields_ = [
     ('rname', c_char_p),
-    ('data', CHAR_PTR),
+    ('data', c_char_p),
     ('length', c_size_t),
     ('encoding', c_ushort),
     ('kind', c_ushort)
