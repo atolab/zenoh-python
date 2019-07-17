@@ -87,11 +87,20 @@ class z_res_id_t(Union):
 class z_resource_id_t(Structure):
   _fields_ = [('kind', c_int), ('id', z_res_id_t)]
 
+class z_timestamp_t(Structure):
+  _fields_ = [
+    ("clock_id", c_uint8 * 16),
+    ("time", c_uint)
+  ]
+
 # Data Info
 class z_data_info_t(Structure):
-  _fields_ = [('flags', c_uint),
-              ('encoding', c_ushort),
-              ('kind', c_ushort)]
+  _fields_ = [
+    ('flags', c_uint),
+    ('tstamp', z_timestamp_t),
+    ('encoding', c_ushort),
+    ('kind', c_ushort)]
+
 
 # Temporal properties  
 class z_temporal_property_t(Structure):
