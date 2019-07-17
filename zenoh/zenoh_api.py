@@ -101,6 +101,15 @@ class Zenoh(object):
         self.zlib.z_query.restype = c_int
         self.zlib.z_query.argtypes = [c_void_p, c_char_p, c_char_p, ZENOH_REPLY_CALLBACK_PROTO, POINTER(c_int64)]
 
+        self.zlib.z_undeclare_subscriber.restype = c_int 
+        self.zlib.z_undeclare_subscriber.argtypes = [c_void_p]
+
+        self.zlib.z_undeclare_storage.restype = c_int 
+        self.zlib.z_undeclare_storage.argtypes = [c_void_p]
+
+        self.zlib.z_undeclare_publisher.restype = c_int 
+        self.zlib.z_undeclare_publisher.argtypes = [c_void_p]
+
         self.zlib.intersect.restype = c_int 
         self.zlib.intersect.argtypes = [c_char_p, c_char_p]
 
@@ -264,7 +273,14 @@ class Zenoh(object):
             del replyCallbackMap[h]
             raise Exception('Unable to create query')
 
-      
+    def undeclare_publisher(self, pub):
+        self.zlib.z_undeclare_publisher(pub)
+
+    def undeclare_subscriber(self, sub):
+        self.zlib.z_undeclare_subscriber(sub)
+
+    def undeclare_storage(self, sto):
+        self.zlib.z_undeclare_storage(sto)
 
     def close(self):        
         """
