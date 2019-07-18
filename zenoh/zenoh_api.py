@@ -31,6 +31,7 @@ class SubscriberMode(object):
     return SubscriberMode(SubscriberMode.Z_PUSH_MODE, None)
 
 def z_to_canonical_locator(locator):
+    locator = locator or ''
     locator = locator.strip()
     a, b, c = locator.partition('/')
     if a == 'tcp' and b == '/':
