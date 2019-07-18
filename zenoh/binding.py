@@ -90,9 +90,15 @@ class z_res_id_t(Union):
 class z_resource_id_t(Structure):
   _fields_ = [('kind', c_int), ('id', z_res_id_t)]
 
+# TimeStamp
+class z_timestamp_t(Structure):
+  _fields_ = [('clock_id', c_uint8 * 16),
+              ('time', c_size_t)]
+
 # Data Info
 class z_data_info_t(Structure):
   _fields_ = [('flags', c_uint),
+              ('tstamp', z_timestamp_t ),
               ('encoding', c_ushort),
               ('kind', c_ushort)]
 
@@ -143,6 +149,8 @@ class QueryReply(object):
       self.data = zrv.data[:zrv.data_length]
       self.info = z_data_info_t()
       self.info.flags = zrv.info.flags
+      self.info.tstamp.clock_id = zrv.info.tstamp.clock_id
+      self.info.tstamp.time = zrv.info.tstamp.time
       self.info.encoding = zrv.info.encoding
       self.info.kind = zrv.info.kind
 
