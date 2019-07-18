@@ -47,7 +47,7 @@ def z_to_canonical_locator(locator):
             return 'tcp/' + socket.gethostbyname(h) + ':' + str(7447)
 
 class Zenoh(object): 
-    zenoh_native_lib = CDLL(zenoh_lib_path)     
+    zenoh_native_lib = CDLL(zenoh_lib_path)
     
     
     def __init__(self,  locator, uid = None, pwd = None):                                                  
@@ -69,6 +69,9 @@ class Zenoh(object):
         self.zlib.z_info.restype = z_vec_t
         self.zlib.z_info.argtypes = [c_void_p]
 
+        self.zlib.z_running.restype = c_int
+        self.zlib.z_running.argtypes = [c_void_p]
+
         self.zlib.z_vec_get.restype = c_void_p
         self.zlib.z_vec_get.argtypes = [POINTER(z_vec_t), c_uint]
 
@@ -82,6 +85,9 @@ class Zenoh(object):
 
         self.zlib.z_start_recv_loop.restype = c_int
         self.zlib.z_start_recv_loop.argtypes = [c_void_p]
+
+        self.zlib.z_stop_recv_loop.restype = c_int
+        self.zlib.z_stop_recv_loop.argtypes = [c_void_p]
 
         self.zlib.z_stream_compact_data.restype = c_int 
         self.zlib.z_stream_compact_data.argtypes = [c_void_p, POINTER(c_char), c_int]
@@ -124,7 +130,6 @@ class Zenoh(object):
 
         self.zlib.z_start_recv_loop(self.zenoh)
 
-
     def info(self):
         ps = self.zlib.z_info(self.zenoh)
         res = {}
@@ -133,6 +138,10 @@ class Zenoh(object):
             val = prop[0].value
             res[i] = val.elem[:val.length]
         return res
+    
+    @property
+    def running(self):
+        return (self.zlib.z_running(self.zenoh) != 0)
 
     @staticmethod
     def intersect( a, b):
@@ -286,7 +295,7 @@ class Zenoh(object):
         """
             Closes the zenoh session.
         """
-        return None
+        self.zlib.z_stop_recv_loop(self.zenoh)
 
 
 
