@@ -121,9 +121,9 @@ class Zenoh(object):
         self.zlib.intersect.argtypes = [c_char_p, c_char_p]
 
         l = z_to_canonical_locator(locator)
-        if not isinstance(uid, bytes):
+        if isinstance(uid, str):
             uid = uid.encode()
-        if not isinstance(pwd, bytes):
+        if isinstance(pwd, str):
             pwd = pwd.encode()
         r = self.zlib.z_open_wup(l.encode(), uid, pwd)
         if r.tag == Z_OK_TAG:
