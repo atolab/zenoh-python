@@ -24,7 +24,7 @@ def query_handler(path_selector, content_selector):
   return reply
 
 if __name__ == '__main__':    
-    z = zenoh.Zenoh(args['zenohd'], 'user'.encode(), 'password'.encode())
+    z = zenoh.Zenoh(args['zenohd'], 'user', 'password')
     r_name = '/demo/hello/*'
     
     print('Declaring Subscriber for {}', r_name)

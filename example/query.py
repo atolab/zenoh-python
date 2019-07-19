@@ -21,7 +21,7 @@ def callback(reply):
     
 
 if __name__ == '__main__':    
-    z = zenoh.Zenoh(args['zenohd'], 'user'.encode(), 'password'.encode())
+    z = zenoh.Zenoh(args['zenohd'], 'user', 'password')
     selector = '/demo/**'
     
     print('Execuring query {}', selector)

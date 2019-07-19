@@ -10,7 +10,7 @@ ap.add_argument("-z", "--zenohd", required=True,
 args = vars(ap.parse_args())
 
 def run_pub(locator):        
-    z = zenoh.Zenoh(locator, 'user'.encode(), 'password'.encode())    
+    z = zenoh.Zenoh(locator, 'user', 'password')
     r_name = '/demo/hello/piton'
     print('Declaring Publisher for {}', r_name)
     pub = z.declare_publisher(r_name)            

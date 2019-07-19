@@ -12,7 +12,7 @@ ap.add_argument("-s", "--size", required=True,
 args = vars(ap.parse_args())
 
 def run_pub(locator):        
-    z = zenoh.Zenoh(locator, 'user'.encode(), 'password'.encode())    
+    z = zenoh.Zenoh(locator, 'user', 'password')
     r_name = '/test/thr'
     print('Declaring Publisher for {}', r_name)
     pub = z.declare_publisher(r_name)            
