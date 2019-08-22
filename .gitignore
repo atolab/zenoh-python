@@ -9,6 +9,7 @@ TODO
 # Distribution / packaging
 .Python
 build/
+_build/
 develop-eggs/
 dist/
 downloads/
