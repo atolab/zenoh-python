@@ -80,7 +80,8 @@ class Zenoh(object):
         self.zlib.z_declare_subscriber.argtypes = [c_void_p, c_char_p, POINTER(z_sub_mode_t), ZENOH_SUBSCRIBER_CALLBACK_PROTO, POINTER(c_int64)]
 
         self.zlib.z_declare_storage.restype = z_sto_p_result_t
-        self.zlib.z_declare_storage.argtypes = [c_void_p, c_char_p, ZENOH_SUBSCRIBER_CALLBACK_PROTO, ZENOH_QUERY_HANDLER_PROTO, ZENOH_REPLY_CLEANER_PROTO, POINTER(c_int64)]
+        self.zlib.z_declare_storage.argtypes = [c_void_p, c_char_p, ZENOH_SUBSCRIBER_CALLBACK_PROTO, ZENOH_QUERY_HANDLER_PROTO, POINTER(c_int64)]
+
         self.zlib.z_declare_publisher.restype = z_pub_p_result_t
         self.zlib.z_declare_publisher.argtypes = [c_void_p, c_char_p]
 
@@ -210,7 +211,6 @@ class Zenoh(object):
             selector.encode(), 
             z_subscriber_trampoline_callback, 
             z_query_handler_trampoline, 
-            z_no_op_reply_cleaner, 
             k)
         if r.tag == 0:
             return r.value.sto

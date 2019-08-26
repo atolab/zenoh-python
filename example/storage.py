@@ -15,13 +15,13 @@ def insert_handler(rname, data, info):
   print('Inserting data for resource: {}'.format(rname))
   store[rname] = (data, info)
 
-def query_handler(path_selector, content_selector):  
-  reply = []
+def query_handler(path_selector, content_selector, send_replies):
+  replies = []
   for k,v in store.items():
     if zenoh.Zenoh.intersect(path_selector, k):
       print('Responding to query with ({}, {})'.format(k, v))
-      reply.append((k,v))
-  return reply
+      replies.append((k,v))
+  send_replies(replies)
 
 if __name__ == '__main__':    
     z = zenoh.Zenoh(args['zenohd'], 'user', 'password')
