@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/atolab/zenoh-python.svg?branch=master)](https://travis-ci.org/atolab/zenoh-python)
+
 # Zenoh Python API
 
 [Zenoh](http://zenoh.io) is an extremely efficient and fault-tolerant [Named Data Networking](http://named-data.net) (NDN) protocol 
