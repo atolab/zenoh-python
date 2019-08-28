@@ -19,6 +19,14 @@ Z_REPLY_FINAL = 0x02
 Z_OK_TAG = 0
 Z_ERROR_TAG = 1
 
+Z_SRC_ID = 0x01
+Z_SRC_SN = 0x02
+Z_BRK_ID = 0x04
+Z_BRK_SN = 0x08
+Z_T_STAMP = 0x10
+Z_KIND = 0x20
+Z_ENCODING = 0x40
+
 subscriberCallbackMap = {}
 replyCallbackMap = {}
 queryHandlerMap = {}
@@ -114,6 +122,13 @@ class z_data_info_t(Structure):
                 ('tstamp', z_timestamp_t),
                 ('encoding', c_ushort),
                 ('kind', c_ushort)]
+
+
+class py_data_info_t(Structure):
+    def __init__(self, z_info):
+        self.kind = z_info.kind if z_info.flags & Z_KIND else None
+        self.tstamp = z_info.tstamp if z_info.flags & Z_T_STAMP else None
+        self.encoding = z_info.encoding if z_info.flags & Z_ENCODING else None
 
 
 # Temporal properties
@@ -222,7 +237,8 @@ def z_subscriber_trampoline_callback(rid, data, length, info, arg):
     key = arg.contents.value
     _, callback = subscriberCallbackMap[key]
     if rid.contents.kind == Z_STR_RES_ID:
-        callback(rid.contents.id.rname.decode(), data[:length], info.contents)
+        py_info = py_data_info_t(info.contents)
+        callback(rid.contents.id.rname.decode(), data[:length], py_info)
     else:
         print('WARNING: Received data for unknown  resource name, rid = {}'
               .format(rid.id.rid))
