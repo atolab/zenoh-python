@@ -1,6 +1,27 @@
+before_install:
+  - sudo apt-get install -y libssl1.0.0 libev4
+  - sudo curl -L -o /usr/local/lib/libzenohc.so https://github.com/atolab/atobin/raw/master/zenoh-c/unstable/ubuntu/16.04/libzenohc.so
+  - sudo apt install -y python3-pip
+addons:
+  apt:
+    update: true
+dist: xenial
 language: python
-os: linux
 python:
   - "3.5"
   - "3.6"
   - "3.7"
+env:
+  matrix:
+  - TOXENV=py3
+  - TOXENV=pep8
+
+install:
+  - travis_retry pip install tox
+  - pip install codecov
+script: tox
+cache:
+  directories:
+    - $HOME/.cache/pip
+after_success:
+- codecov
