@@ -20,7 +20,8 @@ install:
   - travis_retry pip install tox
   - pip install flake8
   - pip install codecov
-script: tox
+script:
+  - bash -ex .travis-ci.sh
 cache:
   directories:
     - $HOME/.cache/pip
