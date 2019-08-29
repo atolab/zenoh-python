@@ -20,6 +20,7 @@ install:
   - travis_retry pip install tox
   - pip install flake8
   - pip install codecov
+  - pip install mvar
 script:
   - bash -ex .travis-ci.sh
 cache:
