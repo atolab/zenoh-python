@@ -29,7 +29,7 @@ if __name__ == '__main__':
     z = zenoh.Zenoh(args['zenohd'], 'user', 'password')
     r_name = '/demo/hello/*'
 
-    print('Declaring Subscriber for {}', r_name)
+    print('Declaring Storage for {}', r_name)
     sub = z.declare_storage(r_name, insert_handler, query_handler)
 
     time.sleep(600)
