@@ -30,6 +30,8 @@ if __name__ == '__main__':
     r_name = '/demo/hello/*'
 
     print('Declaring Storage for {}', r_name)
-    sub = z.declare_storage(r_name, insert_handler, query_handler)
+    sto = z.declare_storage(r_name, insert_handler, query_handler)
 
     time.sleep(600)
+
+    z.undeclare_storage(sto)

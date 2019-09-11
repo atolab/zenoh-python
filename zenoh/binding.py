@@ -14,7 +14,9 @@ Z_REMOVE = 0x02
 
 Z_STORAGE_DATA = 0x00
 Z_STORAGE_FINAL = 0x01
-Z_REPLY_FINAL = 0x02
+Z_EVAL_DATA = 0x02
+Z_EVAL_FINAL = 0x03
+Z_REPLY_FINAL = 0x04
 
 Z_OK_TAG = 0
 Z_ERROR_TAG = 1
@@ -97,6 +99,14 @@ class z_sto_p_result_t(Structure):
     _fields_ = [('tag', c_int), ('value', z_sto_p_result_union_t)]
 
 
+class z_eval_p_result_union_t(Union):
+    _fields_ = [('eval', c_void_p), ('error', c_int)]
+
+
+class z_eval_p_result_t(Structure):
+    _fields_ = [('tag', c_int), ('value', z_eval_p_result_union_t)]
+
+
 class z_vec_t(Structure):
     _fields_ = [('capacity_', c_int), ('length_', c_int), ('elem_', c_void_p)]
 
@@ -124,11 +134,19 @@ class z_data_info_t(Structure):
                 ('kind', c_ushort)]
 
 
-class py_data_info_t(Structure):
-    def __init__(self, z_info):
-        self.kind = z_info.kind if z_info.flags & Z_KIND else None
-        self.tstamp = z_info.tstamp if z_info.flags & Z_T_STAMP else None
-        self.encoding = z_info.encoding if z_info.flags & Z_ENCODING else None
+class DataInfo():
+    def __init__(self, kind=None, encoding=None, tstamp=None):
+        self.kind = kind
+        self.tstamp = tstamp
+        self.encoding = encoding
+
+    @staticmethod
+    def from_z_data_info(z_info):
+        return DataInfo(
+            kind=z_info.kind if z_info.flags & Z_KIND else None,
+            encoding=z_info.encoding if z_info.flags & Z_ENCODING else None,
+            tstamp=z_info.tstamp if z_info.flags & Z_T_STAMP else None
+        )
 
 
 # Temporal properties
@@ -168,9 +186,6 @@ class z_reply_value_t(Structure):
 
 
 class QueryReply(object):
-    STORAGE_DATA = 0x00
-    STORAGE_FINAL = 0x01
-    REPLY_FINAL = 0x02
 
     def __init__(self, zrv):
         self.kind = zrv.kind
@@ -179,7 +194,8 @@ class QueryReply(object):
         self.data = None
         self.info = None
 
-        if self.kind == QueryReply.STORAGE_DATA:
+        if(self.kind == Z_STORAGE_DATA
+           or self.kind == Z_EVAL_DATA):
             self.store_id = zrv.stoid[:zrv.stoid_length]
             self.rname = zrv.rname.decode()
             self.data = zrv.data[:zrv.data_length]
@@ -190,7 +206,8 @@ class QueryReply(object):
             self.info.encoding = zrv.info.encoding
             self.info.kind = zrv.info.kind
 
-        elif self.kind == QueryReply.STORAGE_FINAL:
+        elif(self.kind == Z_STORAGE_FINAL
+             or self.kind == Z_EVAL_FINAL):
             self.store_id = zrv.stoid[:zrv.stoid_length]
 
 
@@ -237,7 +254,7 @@ def z_subscriber_trampoline_callback(rid, data, length, info, arg):
     key = arg.contents.value
     _, callback = subscriberCallbackMap[key]
     if rid.contents.kind == Z_STR_RES_ID:
-        py_info = py_data_info_t(info.contents)
+        py_info = DataInfo.from_z_data_info(info.contents)
         callback(rid.contents.id.rname.decode(), data[:length], py_info)
     else:
         print('WARNING: Received data for unknown  resource name, rid = {}'
@@ -265,8 +282,19 @@ def send_replies_fun(send_replies, query_handle, replies):
         replies_array.elem[i].contents.rname = k.encode()
         replies_array.elem[i].contents.data = d
         replies_array.elem[i].contents.length = len(d)
-        replies_array.elem[i].contents.encoding = info.encoding
-        replies_array.elem[i].contents.kind = info.kind
+
+        encoding_not_none = info is not None and info.encoding is not None
+        encoding = info.encoding if encoding_not_none else 0
+        replies_array.elem[i].contents.encoding = encoding
+
+        kind_not_none = info is not None and info.kind is not None
+        kind = info.kind if kind_not_none else 0
+        replies_array.elem[i].contents.kind = kind
+
+        tstamp_not_none = info is not None and info.tstamp is not None
+        tstamp = info.tstamp if tstamp_not_none else 0
+        replies_array.elem[i].contents.tstamp = tstamp
+
         i += 1
     send_replies(query_handle, replies_array)
 

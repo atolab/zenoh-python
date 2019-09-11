@@ -28,6 +28,7 @@ def run_pub(locator):
         count += 1
         time.sleep(0.5)
 
+    z.undeclare_publisher(pub)
     z.close()
 
 

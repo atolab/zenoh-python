@@ -31,4 +31,6 @@ if __name__ == '__main__':
     print('Declaring Subscriber for {}', r_name)
     sub = z.declare_subscriber(r_name, zenoh.SubscriberMode.push(), callback)
 
-    time.sleep(60)
+    time.sleep(600)
+
+    z.undeclare_subscriber(sub)
