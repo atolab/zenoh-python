@@ -137,6 +137,9 @@ class Zenoh(object):
         self.zlib.z_undeclare_publisher.restype = c_int
         self.zlib.z_undeclare_publisher.argtypes = [c_void_p]
 
+        self.zlib.z_close.restype = c_int
+        self.zlib.z_close.argtypes = [c_void_p]
+
         self.zlib.intersect.restype = c_int
         self.zlib.intersect.argtypes = [c_char_p, c_char_p]
 
@@ -362,4 +365,5 @@ class Zenoh(object):
         """
             Closes the zenoh session.
         """
+        self.zlib.z_close(self.zenoh)
         self.zlib.z_stop_recv_loop(self.zenoh)
