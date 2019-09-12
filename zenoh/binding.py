@@ -130,7 +130,7 @@ class z_timestamp_t(Structure):
 class z_data_info_t(Structure):
     _fields_ = [('flags', c_uint),
                 ('tstamp', z_timestamp_t),
-                ('encoding', c_ushort),
+                ('encoding', c_uint8),
                 ('kind', c_ushort)]
 
 
