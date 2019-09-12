@@ -105,13 +105,6 @@ class Zenoh(object):
         self.zlib.z_stream_compact_data.argtypes = [
             c_void_p, POINTER(c_char), c_int]
 
-        self.zlib.z_stream_data.restype = c_int
-        self.zlib.z_stream_data.argtypes = [c_void_p, c_char_p, c_int]
-
-        self.zlib.z_write_data.restype = c_int
-        self.zlib.z_write_data.argtypes = [
-            c_void_p, c_char_p, c_char_p, c_int]
-
         self.zlib.z_stream_data_wo.restype = c_int
         self.zlib.z_stream_data_wo.argtypes = [
             c_void_p, c_char_p, c_int, c_uint8, c_uint8]
@@ -287,16 +280,18 @@ class Zenoh(object):
         """
         self.zlib.z_stream_compact_data(pub, data, len(data))
 
-    def stream_data(self, pub, data):
+    def stream_data(self, pub, data, encoding=0, kind=Z_PUT):
         """
             Streams data.
 
             :param pub: the publisher
             :param data: the bytes containing the data to stream.
+            :param encoding: the encoding of the data
+            :param kind: the kind of update
         """
-        self.zlib.z_stream_data(pub, data, len(data))
+        self.zlib.z_stream_data_wo(pub, data, len(data), encoding, kind)
 
-    def write_data_wo(self, resource, data, encoding, kind):
+    def write_data(self, resource, data, encoding=0, kind=Z_PUT):
         """
             Writes data for a given resource withouth requiring the
             declaration of a publisher. This operation should be used
@@ -304,7 +299,7 @@ class Zenoh(object):
 
             :param resource: the name of the resource
             :param data: the bytes containing the data to stream
-            :param encoding: the encoding for the resource
+            :param encoding: the encoding of the data
             :param kind: the kind of update
         """
         self.zlib.z_write_data_wo(self.zenoh,
@@ -313,17 +308,6 @@ class Zenoh(object):
                                   len(data),
                                   encoding,
                                   kind)
-
-    def write_data(self, resource, data):
-        """
-            Writes data for a given resource withouth requiring the
-            declaration of a publisher. This operation should be used
-            for resources that are sporadically written.
-
-            :param resource: the name of the resource
-            :param data: the bytes containing the data to stream
-        """
-        self.write_data_wo(resource, data, 0, Z_PUT)
 
     def query(self, resource, predicate, callback):
         """
