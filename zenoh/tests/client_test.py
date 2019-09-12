@@ -119,11 +119,63 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(2, len(eval_replies))
         eval_replies = []
 
+        z1.query("/test/python/client/**", "", reply_handler,
+                 dest_storages=zenoh.QueryDest(zenoh.QueryDest.Z_BEST_MATCH),
+                 dest_evals=zenoh.QueryDest(zenoh.QueryDest.Z_NONE))
+        replies_mvar.get()
+        self.assertEqual(2, len(storage_replies))
+        self.assertEqual(sent_res, storage_replies[0])
+        self.assertEqual(sent_res, storage_replies[1])
+        storage_replies = []
+        # self.assertEqual(0, len(eval_replies))
+        # This may not be true for now as :
+        #  - zenoh-c does not check received query properties
+        #  - zenohd does not filter out replies
+        eval_replies = []
+
+        z1.query("/test/python/client/**", "", reply_handler,
+                 dest_storages=zenoh.QueryDest(zenoh.QueryDest.Z_NONE),
+                 dest_evals=zenoh.QueryDest(zenoh.QueryDest.Z_BEST_MATCH))
+        replies_mvar.get()
+        # self.assertEqual(2, len(storage_replies))
+        # This may not be true for now as :
+        #  - zenoh-c does not check received query properties
+        #  - zenohd does not filter out replies
+        storage_replies = []
+        self.assertEqual(2, len(eval_replies))
+        eval_replies = []
+
         z2.query("/test/python/client/**", "", reply_handler)
         replies_mvar.get()
         self.assertEqual(2, len(storage_replies))
         self.assertEqual(sent_res, storage_replies[0])
         self.assertEqual(sent_res, storage_replies[1])
+        storage_replies = []
+        self.assertEqual(2, len(eval_replies))
+        eval_replies = []
+
+        z2.query("/test/python/client/**", "", reply_handler,
+                 dest_storages=zenoh.QueryDest(zenoh.QueryDest.Z_BEST_MATCH),
+                 dest_evals=zenoh.QueryDest(zenoh.QueryDest.Z_NONE))
+        replies_mvar.get()
+        self.assertEqual(2, len(storage_replies))
+        self.assertEqual(sent_res, storage_replies[0])
+        self.assertEqual(sent_res, storage_replies[1])
+        storage_replies = []
+        # self.assertEqual(0, len(eval_replies))
+        # This may not be true for now as :
+        #  - zenoh-c does not check received query properties
+        #  - zenohd does not filter out replies
+        eval_replies = []
+
+        z2.query("/test/python/client/**", "", reply_handler,
+                 dest_storages=zenoh.QueryDest(zenoh.QueryDest.Z_NONE),
+                 dest_evals=zenoh.QueryDest(zenoh.QueryDest.Z_BEST_MATCH))
+        replies_mvar.get()
+        # self.assertEqual(2, len(storage_replies))
+        # This may not be true for now as :
+        #  - zenoh-c does not check received query properties
+        #  - zenohd does not filter out replies
         storage_replies = []
         self.assertEqual(2, len(eval_replies))
         eval_replies = []

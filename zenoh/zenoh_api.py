@@ -30,6 +30,18 @@ class SubscriberMode(object):
         return SubscriberMode(SubscriberMode.Z_PUSH_MODE, None)
 
 
+class QueryDest(object):
+    Z_BEST_MATCH = 0
+    Z_COMPLETE = 1
+    Z_ALL = 2
+    Z_NONE = 3
+
+    def __init__(self, kind, nb=1):
+        self.z_qd = z_query_dest_t()
+        self.z_qd.kind = kind
+        self.z_qd.nb = nb
+
+
 def z_to_canonical_locator(locator):
     locator = locator or ''
     locator = locator.strip()
@@ -113,10 +125,11 @@ class Zenoh(object):
         self.zlib.z_write_data_wo.argtypes = [
             c_void_p, c_char_p, c_char_p, c_int, c_uint8, c_uint8]
 
-        self.zlib.z_query.restype = c_int
-        self.zlib.z_query.argtypes = [
+        self.zlib.z_query_wo.restype = c_int
+        self.zlib.z_query_wo.argtypes = [
             c_void_p, c_char_p, c_char_p,
-            ZENOH_REPLY_CALLBACK_PROTO, POINTER(c_int64)]
+            ZENOH_REPLY_CALLBACK_PROTO, POINTER(c_int64),
+            z_query_dest_t, z_query_dest_t]
 
         self.zlib.z_undeclare_subscriber.restype = c_int
         self.zlib.z_undeclare_subscriber.argtypes = [c_void_p]
@@ -309,14 +322,16 @@ class Zenoh(object):
                                   encoding,
                                   kind)
 
-    def query(self, resource, predicate, callback):
+    def query(self, resource, predicate, callback,
+              dest_storages=QueryDest(QueryDest.Z_BEST_MATCH),
+              dest_evals=QueryDest(QueryDest.Z_BEST_MATCH)):
         """
             Execute a query for a resource selector with a given predicate.
 
             :param resource: the resource selector
             :param predicate: the predicate
-            :param callback: the callback to call when replies to this query
-                             are available
+            :param dest_storages: the storages that should reply to this query
+            :param dest_evals: the evals that should reply to this query
         """
         global replyCallbackMap
         h = hash(callback)
@@ -324,11 +339,13 @@ class Zenoh(object):
         k.contents = c_int64()
         k.contents.value = h
         replyCallbackMap[h] = (k, callback)
-        r = self.zlib.z_query(self.zenoh,
-                              resource.encode(),
-                              predicate.encode(),
-                              z_reply_trampoline_callback,
-                              k)
+        r = self.zlib.z_query_wo(self.zenoh,
+                                 resource.encode(),
+                                 predicate.encode(),
+                                 z_reply_trampoline_callback,
+                                 k,
+                                 dest_storages.z_qd,
+                                 dest_evals.z_qd)
         if r != 0:
             del replyCallbackMap[h]
             raise Exception('Unable to create query')

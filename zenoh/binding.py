@@ -149,6 +149,11 @@ class DataInfo():
         )
 
 
+# Query destination
+class z_query_dest_t(Structure):
+    _fields_ = [('kind', c_uint8), ('nb', c_uint8)]
+
+
 # Temporal properties
 class z_temporal_property_t(Structure):
     _fields_ = [('origin', c_int), ('period', c_int), ('duration', c_int)]
