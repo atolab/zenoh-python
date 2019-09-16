@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/atolab/zenoh-python.svg?branch=master)](https://travis-ci.org/atolab/zenoh-python)
 [![codecov](https://codecov.io/gh/atolab/zenoh-python/branch/master/graph/badge.svg)](https://codecov.io/gh/atolab/zenoh-python)
+[![Gitter](https://badges.gitter.im/adlink-labs/zenoh.svg)](https://gitter.im/adlink-labs/zenoh?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 # Zenoh Python API
 
