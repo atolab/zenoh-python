@@ -25,8 +25,9 @@ if __name__ == '__main__':
     print("Declaring Eval on '{}'...".format(uri))
     eva = z.declare_eval(uri, query_handler)
 
-    while True:
-        time.sleep(60)
+    c = '\0'
+    while c != 'q':
+        c = sys.stdin.read(1)
 
     z.undeclare_eval(eva)
     z.close()

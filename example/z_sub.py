@@ -23,8 +23,9 @@ if __name__ == '__main__':
     print("Declaring Subscriber on '{}'".format(uri))
     sub = z.declare_subscriber(uri, zenoh.SubscriberMode.push(), listener)
 
-    while True:
-        time.sleep(60)
+    c = '\0'
+    while c != 'q':
+        c = sys.stdin.read(1)
 
     z.undeclare_subscriber(sub)
     z.close()

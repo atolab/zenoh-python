@@ -36,8 +36,9 @@ if __name__ == '__main__':
     print("Declaring Storage on '{}'".format(uri))
     sto = z.declare_storage(uri, listener, query_handler)
 
-    while True:
-        time.sleep(60)
+    c = '\0'
+    while c != 'q':
+        c = sys.stdin.read(1)
 
     z.undeclare_storage(sto)
     z.close()
