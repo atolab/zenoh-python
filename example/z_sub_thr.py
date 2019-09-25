@@ -9,8 +9,10 @@ count = 0
 start = None
 stop = None
 
+
 def print_stats(start, stop):
     print("{:.6f} msgs/sec".format(N / (stop-start).total_seconds()))
+
 
 def listener(rname, data, info):
     global count, start, stop
@@ -24,13 +26,16 @@ def listener(rname, data, info):
         print_stats(start, stop)
         count = 0
 
+
 if __name__ == '__main__':
     locator = "tcp/127.0.0.1:7447"
     if len(sys.argv) > 1:
         locator = sys.argv[1]
 
     z = zenoh.Zenoh(locator, 'user', 'password')
-    sub = z.declare_subscriber('/test/thr', zenoh.SubscriberMode.push(), listener)
+    sub = z.declare_subscriber('/test/thr',
+                               zenoh.SubscriberMode.push(),
+                               listener)
 
     time.sleep(60)
 
