@@ -1,5 +1,5 @@
 import sys
-import zenoh
+from zenoh import Zenoh
 
 if __name__ == '__main__':
     locator = "tcp/127.0.0.1:7447"
@@ -11,7 +11,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 2:
         locator = sys.argv[2]
 
-    z = zenoh.Zenoh(locator, 'user', 'password')
+    z = Zenoh.open(locator, 'user', 'password')
     pub = z.declare_publisher('/test/thr')
 
     bs = bytearray()

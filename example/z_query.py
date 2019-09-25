@@ -1,7 +1,7 @@
 import sys
 import time
+from zenoh import Zenoh, QueryDest
 import zenoh
-from zenoh import QueryDest
 
 
 def reply_handler(reply):
@@ -29,7 +29,7 @@ if __name__ == '__main__':
         uri = sys.argv[2]
 
     print("Connecting to {}...".format(locator))
-    z = zenoh.Zenoh(locator, 'user', 'password')
+    z = Zenoh.open(locator, 'user', 'password')
 
     print("Sending query '{}'...".format(uri))
     dest_all = QueryDest(QueryDest.Z_ALL)

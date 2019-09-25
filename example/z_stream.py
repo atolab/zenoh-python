@@ -1,7 +1,7 @@
 import sys
 import time
 import itertools
-import zenoh
+from zenoh import Zenoh
 
 
 if __name__ == '__main__':
@@ -18,7 +18,7 @@ if __name__ == '__main__':
         value = sys.argv[3]
 
     print("Connecting to {}...".format(locator))
-    z = zenoh.Zenoh(locator, 'user', 'password')
+    z = Zenoh.open(locator, 'user', 'password')
 
     print("Declaring Publisher on '{}'".format(uri))
     pub = z.declare_publisher(uri)

@@ -1,6 +1,6 @@
 import sys
 import time
-import zenoh
+from zenoh import Zenoh, SubscriberMode
 
 
 def listener(rname, data, info):
@@ -18,10 +18,10 @@ if __name__ == '__main__':
         uri = sys.argv[2]
 
     print("Connecting to {}...".format(locator))
-    z = zenoh.Zenoh(locator, 'user', 'password')
+    z = Zenoh.open(locator, 'user', 'password')
 
     print("Declaring Subscriber on '{}'".format(uri))
-    sub = z.declare_subscriber(uri, zenoh.SubscriberMode.push(), listener)
+    sub = z.declare_subscriber(uri, SubscriberMode.push(), listener)
 
     c = '\0'
     while c != 'q':

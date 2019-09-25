@@ -1,13 +1,13 @@
 import sys
 import time
-import zenoh
+from zenoh import Zenoh, DataInfo, Z_PUT
 
 
 def query_handler(path_selector, content_selector, send_replies):
     print(">> [Query handler] Handling '{}?{}'"
           .format(path_selector, content_selector))
     k, v = "/demo/example/zenoh-python-eval", "Eval from Python!".encode()
-    send_replies([(k, (v, zenoh.DataInfo(kind=zenoh.Z_PUT)))])
+    send_replies([(k, (v, DataInfo(kind=Z_PUT)))])
 
 
 if __name__ == '__main__':
@@ -20,7 +20,7 @@ if __name__ == '__main__':
         uri = sys.argv[2]
 
     print("Connecting to {}...".format(locator))
-    z = zenoh.Zenoh(locator, 'user', 'password')
+    z = Zenoh.open(locator, 'user', 'password')
 
     print("Declaring Eval on '{}'...".format(uri))
     eva = z.declare_eval(uri, query_handler)

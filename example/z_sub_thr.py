@@ -1,7 +1,7 @@
 import sys
 import time
 import datetime
-import zenoh
+from zenoh import Zenoh, SubscriberMode
 
 N = 100000
 
@@ -32,10 +32,8 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         locator = sys.argv[1]
 
-    z = zenoh.Zenoh(locator, 'user', 'password')
-    sub = z.declare_subscriber('/test/thr',
-                               zenoh.SubscriberMode.push(),
-                               listener)
+    z = Zenoh.open(locator, 'user', 'password')
+    sub = z.declare_subscriber('/test/thr', SubscriberMode.push(), listener)
 
     time.sleep(60)
 

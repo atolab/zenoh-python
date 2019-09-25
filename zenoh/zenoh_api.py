@@ -164,6 +164,10 @@ class Zenoh(object):
 
         self.zlib.z_start_recv_loop(self.zenoh)
 
+    @staticmethod
+    def open(locator, uid=None, pwd=None):
+        return Zenoh(locator, uid, pwd)
+
     def info(self):
         ps = self.zlib.z_info(self.zenoh)
         res = {}

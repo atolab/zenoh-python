@@ -1,6 +1,6 @@
 import sys
 import time
-import zenoh
+from zenoh import Zenoh
 
 store = {}
 
@@ -16,7 +16,7 @@ def query_handler(path_selector, content_selector, send_replies):
           .format(path_selector, content_selector))
     replies = []
     for k, v in store.items():
-        if zenoh.Zenoh.intersect(path_selector, k):
+        if Zenoh.intersect(path_selector, k):
             replies.append((k, v))
     send_replies(replies)
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
         uri = sys.argv[2]
 
     print("Connecting to {}...".format(locator))
-    z = zenoh.Zenoh(locator, 'user', 'password')
+    z = Zenoh.open(locator, 'user', 'password')
 
     print("Declaring Storage on '{}'".format(uri))
     sto = z.declare_storage(uri, listener, query_handler)

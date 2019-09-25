@@ -2,6 +2,7 @@ import sys
 import time
 import binascii
 import zenoh
+from zenoh import Zenoh
 
 
 if __name__ == '__main__':
@@ -10,7 +11,7 @@ if __name__ == '__main__':
         locator = sys.argv[1]
 
     print("Connecting to {}...".format(locator))
-    z = zenoh.Zenoh(locator, 'user', 'password')
+    z = Zenoh.open(locator, 'user', 'password')
 
     info = z.info()
     peer = info[zenoh.Z_INFO_PEER_KEY]
