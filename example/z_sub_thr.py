@@ -11,7 +11,7 @@ stop = None
 
 
 def print_stats(start, stop):
-    print("{:.6f} msgs/sec".format(N / (stop-start).total_seconds()))
+    print("{:.6f} msgs/sec".format(N / (stop - start).total_seconds()))
 
 
 def listener(rname, data, info):
