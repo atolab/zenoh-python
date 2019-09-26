@@ -32,10 +32,9 @@ if __name__ == '__main__':
     z = Zenoh.open(locator, 'user', 'password')
 
     print("Sending query '{}'...".format(uri))
-    dest_all = QueryDest(QueryDest.Z_ALL)
     z.query(uri, "", reply_handler,
-            dest_storages=dest_all,
-            dest_evals=dest_all)
+            dest_storages=QueryDest(QueryDest.Z_ALL),
+            dest_evals=QueryDest(QueryDest.Z_ALL))
 
     time.sleep(1)
 
