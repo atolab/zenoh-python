@@ -7,6 +7,7 @@ from zenoh import Zenoh, DataInfo, SubscriberMode, QueryDest
 
 z1_sub1_mvar = MVar()
 z2_sub1_mvar = MVar()
+z3_sub1_mvar = MVar()
 z1_sto1_last_res = None
 z1_sto1_mvar = MVar()
 z2_sto1_last_res = None
@@ -22,6 +23,10 @@ def z1_sub1_listener(rname, data, info):
 
 def z2_sub1_listener(rname, data, info):
     z2_sub1_mvar.put((rname, data))
+
+
+def z3_sub1_listener(rname, data, info):
+    z3_sub1_mvar.put((rname, data))
 
 
 def z1_sto1_listener(rname, data, info):
@@ -95,10 +100,18 @@ class ClientTest(unittest.TestCase):
                                      z2_eval1_handler)
         z2_pub1 = z2.declare_publisher("/test/python/client/z2_pub1")
 
+        z3 = Zenoh.open(locator)
+        z3_peer = z3.info()[zenoh.Z_INFO_PEER_KEY].decode().rstrip('\0')
+        self.assertEqual(locator, z3_peer)
+        z3_sub1 = z3.declare_subscriber("/test/python/client/**",
+                                        SubscriberMode.pull(),
+                                        z3_sub1_listener)
+
         time.sleep(1)
 
         self.assertTrue(z1.running)
         self.assertTrue(z2.running)
+        self.assertTrue(z3.running)
 
         sent_res = ("/test/python/client/z1_wr1", "z1_wr1_spl1".encode())
         z1.write_data(sent_res[0], sent_res[1])
@@ -109,6 +122,9 @@ class ClientTest(unittest.TestCase):
         rcvd_res = z1_sto1_mvar.get()
         self.assertEqual(sent_res, rcvd_res)
         rcvd_res = z2_sto1_mvar.get()
+        self.assertEqual(sent_res, rcvd_res)
+        z1.pull(z3_sub1)
+        rcvd_res = z3_sub1_mvar.get()
         self.assertEqual(sent_res, rcvd_res)
 
         z1.query("/test/python/client/**", "", reply_handler)
@@ -191,6 +207,9 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(sent_res, rcvd_res)
         rcvd_res = z2_sto1_mvar.get()
         self.assertEqual(sent_res, rcvd_res)
+        z1.pull(z3_sub1)
+        rcvd_res = z3_sub1_mvar.get()
+        self.assertEqual(sent_res, rcvd_res)
 
         z1.query("/test/python/client/**", "", reply_handler)
         replies_mvar.get()
@@ -219,6 +238,9 @@ class ClientTest(unittest.TestCase):
         rcvd_res = z1_sto1_mvar.get()
         self.assertEqual(sent_res, rcvd_res)
         rcvd_res = z2_sto1_mvar.get()
+        self.assertEqual(sent_res, rcvd_res)
+        z1.pull(z3_sub1)
+        rcvd_res = z3_sub1_mvar.get()
         self.assertEqual(sent_res, rcvd_res)
 
         z1.query("/test/python/client/**", "", reply_handler)
@@ -249,6 +271,9 @@ class ClientTest(unittest.TestCase):
         self.assertEqual(sent_res, rcvd_res)
         rcvd_res = z2_sto1_mvar.get()
         self.assertEqual(sent_res, rcvd_res)
+        z1.pull(z3_sub1)
+        rcvd_res = z3_sub1_mvar.get()
+        self.assertEqual(sent_res, rcvd_res)
 
         z1.query("/test/python/client/**", "", reply_handler)
         replies_mvar.get()
@@ -270,6 +295,7 @@ class ClientTest(unittest.TestCase):
 
         z1.undeclare_subscriber(z1_sub1)
         z2.undeclare_subscriber(z2_sub1)
+        z3.undeclare_subscriber(z3_sub1)
         z1.undeclare_storage(z1_sto1)
         z2.undeclare_storage(z2_sto1)
         z1.undeclare_eval(z1_eval1)
@@ -279,8 +305,10 @@ class ClientTest(unittest.TestCase):
 
         z1.close()
         z2.close()
+        z3.close()
 
         time.sleep(1)  # let time for close msg to comme back from router
 
         self.assertFalse(z1.running)
         self.assertFalse(z2.running)
+        self.assertFalse(z3.running)

@@ -29,6 +29,10 @@ class SubscriberMode(object):
     def push():
         return SubscriberMode(SubscriberMode.Z_PUSH_MODE, None)
 
+    @staticmethod
+    def pull():
+        return SubscriberMode(SubscriberMode.Z_PULL_MODE, None)
+
 
 class QueryDest(object):
     Z_BEST_MATCH = 0
@@ -124,6 +128,9 @@ class Zenoh(object):
         self.zlib.z_write_data_wo.restype = c_int
         self.zlib.z_write_data_wo.argtypes = [
             c_void_p, c_char_p, c_char_p, c_int, c_uint8, c_uint8]
+
+        self.zlib.z_pull.restype = c_int
+        self.zlib.z_pull.argtypes = [c_void_p]
 
         self.zlib.z_query_wo.restype = c_int
         self.zlib.z_query_wo.argtypes = [
@@ -325,6 +332,15 @@ class Zenoh(object):
                                   len(data),
                                   encoding,
                                   kind)
+
+    def pull(self, sub):
+        """
+            Retrives data for a given pull-mode subscription from
+            the nearest infrastruture component (router).
+
+            :param sub: the concerned pull-mode subscription
+        """
+        self.zlib.z_pull(sub)
 
     def query(self, resource, predicate, callback,
               dest_storages=QueryDest(QueryDest.Z_BEST_MATCH),
