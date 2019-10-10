@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/atolab/zenoh-python.svg?branch=master)](https://travis-ci.org/atolab/zenoh-python)
+[![Build Status](https://travis-ci.com/atolab/zenoh-python.svg?branch=master)](https://travis-ci.com/atolab/zenoh-python)
 [![codecov](https://codecov.io/gh/atolab/zenoh-python/branch/master/graph/badge.svg)](https://codecov.io/gh/atolab/zenoh-python)
 [![Gitter](https://badges.gitter.im/atolab/zenoh.svg)](https://gitter.im/atolab/zenoh?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
