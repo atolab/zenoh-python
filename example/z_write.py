@@ -17,7 +17,7 @@ if __name__ == '__main__':
         value = sys.argv[3]
 
     print("Connecting to {}...".format(locator))
-    z = Zenoh.open(locator, 'user', 'password')
+    z = Zenoh.open(locator)
 
     print("Writing Data ('{}': '{}')...".format(uri, value))
     z.write_data(uri, bytes(value, encoding='utf8'))

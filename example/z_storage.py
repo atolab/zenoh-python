@@ -31,7 +31,7 @@ if __name__ == '__main__':
         uri = sys.argv[2]
 
     print("Connecting to {}...".format(locator))
-    z = Zenoh.open(locator, 'user', 'password')
+    z = Zenoh.open(locator)
 
     print("Declaring Storage on '{}'".format(uri))
     sto = z.declare_storage(uri, listener, query_handler)

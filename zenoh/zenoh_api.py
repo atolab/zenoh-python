@@ -1,6 +1,8 @@
 from .binding import *
 import socket
 
+Z_USER_KEY = 0x50
+Z_PASSWD_KEY = 0x51
 
 Z_INFO_PID_KEY = 0
 Z_INFO_PEER_KEY = 1
@@ -68,7 +70,7 @@ def z_to_canonical_locator(locator):
 class Zenoh(object):
     zenoh_native_lib = CDLL(zenoh_lib_path)
 
-    def __init__(self, locator, uid=None, pwd=None):
+    def __init__(self, locator, properties={}):
         """
             Creates a zenoh runtimes and connect to the broker specified by
             the locator using the optional user-id and password.
@@ -81,17 +83,14 @@ class Zenoh(object):
 
         self.zlib = Zenoh.zenoh_native_lib
 
-        self.zlib.z_open_wup.restype = z_zenoh_p_result_t
-        self.zlib.z_open_wup.argtypes = [c_char_p, c_char_p, c_char_p]
+        self.zlib.z_open.restype = z_zenoh_p_result_t
+        self.zlib.z_open.argtypes = [c_char_p, c_void_p, POINTER(z_vec_t)]
 
         self.zlib.z_info.restype = z_vec_t
         self.zlib.z_info.argtypes = [c_void_p]
 
         self.zlib.z_running.restype = c_int
         self.zlib.z_running.argtypes = [c_void_p]
-
-        self.zlib.z_vec_get.restype = c_void_p
-        self.zlib.z_vec_get.argtypes = [POINTER(z_vec_t), c_uint]
 
         self.zlib.z_declare_subscriber.restype = z_sub_p_result_t
         self.zlib.z_declare_subscriber.argtypes = [
@@ -157,11 +156,8 @@ class Zenoh(object):
         self.zlib.intersect.argtypes = [c_char_p, c_char_p]
 
         loc = z_to_canonical_locator(locator)
-        if isinstance(uid, str):
-            uid = uid.encode()
-        if isinstance(pwd, str):
-            pwd = pwd.encode()
-        r = self.zlib.z_open_wup(loc.encode(), uid, pwd)
+
+        r = self.zlib.z_open(loc.encode(), 0, dict_to_propsvec(properties))
         if r.tag == Z_OK_TAG:
             self.zenoh = r.value.zenoh
             self.connected = True
@@ -172,18 +168,11 @@ class Zenoh(object):
         self.zlib.z_start_recv_loop(self.zenoh)
 
     @staticmethod
-    def open(locator, uid=None, pwd=None):
-        return Zenoh(locator, uid, pwd)
+    def open(locator, properties={}):
+        return Zenoh(locator, properties)
 
     def info(self):
-        ps = self.zlib.z_info(self.zenoh)
-        res = {}
-        for i in range(0, ps.length_):
-            prop = cast(self.zlib.z_vec_get(pointer(ps), i),
-                        POINTER(z_property_t))
-            val = prop[0].value
-            res[i] = val.elem[:val.length]
-        return res
+        return propsvec_to_dict(self.zlib.z_info(self.zenoh))
 
     @property
     def running(self):
@@ -220,9 +209,7 @@ class Zenoh(object):
         """
         global subscriberCallbackMap
         h = hash(callback)
-        k = POINTER(c_int64)()
-        k.contents = c_int64()
-        k.contents.value = h
+        k = POINTER(c_int64)(c_int64(h))
         r = self.zlib.z_declare_subscriber(self.zenoh,
                                            res_name.encode(),
                                            byref(sub_mode.z_sm),
@@ -249,9 +236,7 @@ class Zenoh(object):
         """
         global replyCallbackMap
         h = hash(query_handler)
-        k = POINTER(c_int64)()
-        k.contents = c_int64()
-        k.contents.value = h
+        k = POINTER(c_int64)(c_int64(h))
         subscriberCallbackMap[h] = (k, subscriber_callback)
         queryHandlerMap[h] = (k, query_handler)
         r = self.zlib.z_declare_storage(
@@ -279,9 +264,7 @@ class Zenoh(object):
         """
         global replyCallbackMap
         h = hash(query_handler)
-        k = POINTER(c_int64)()
-        k.contents = c_int64()
-        k.contents.value = h
+        k = POINTER(c_int64)(c_int64(h))
         queryHandlerMap[h] = (k, query_handler)
         r = self.zlib.z_declare_eval(
                 self.zenoh,
@@ -355,9 +338,7 @@ class Zenoh(object):
         """
         global replyCallbackMap
         h = hash(callback)
-        k = POINTER(c_int64)()
-        k.contents = c_int64()
-        k.contents.value = h
+        k = POINTER(c_int64)(c_int64(h))
         replyCallbackMap[h] = (k, callback)
         r = self.zlib.z_query_wo(self.zenoh,
                                  resource.encode(),

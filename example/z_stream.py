@@ -18,7 +18,7 @@ if __name__ == '__main__':
         value = sys.argv[3]
 
     print("Connecting to {}...".format(locator))
-    z = Zenoh.open(locator, 'user', 'password')
+    z = Zenoh.open(locator)
 
     print("Declaring Publisher on '{}'".format(uri))
     pub = z.declare_publisher(uri)

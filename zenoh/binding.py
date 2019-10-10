@@ -1,5 +1,6 @@
 import platform
 import os
+import ctypes
 from ctypes import *
 from functools import partial
 
@@ -108,7 +109,7 @@ class z_eval_p_result_t(Structure):
 
 
 class z_vec_t(Structure):
-    _fields_ = [('capacity_', c_int), ('length_', c_int), ('elem_', c_void_p)]
+    _fields_ = [('capacity', c_int), ('length', c_int), ('elem', c_void_p)]
 
 
 # Resource Id
@@ -172,6 +173,24 @@ class z_array_uint8_t(Structure):
 
 class z_property_t(Structure):
     _fields_ = [('id', c_size_t), ('value', z_array_uint8_t)]
+
+
+def dict_to_propsvec(props):
+    length = len(props)
+    elems = [POINTER(z_property_t)(z_property_t(
+                key, z_array_uint8_t(
+                        len(val),
+                        ctypes.create_string_buffer(val.encode(), len(val)))))
+             for key, val in props.items()]
+    return POINTER(z_vec_t)(z_vec_t(
+        length, length,
+        cast(((POINTER(z_property_t) * length)(*elems)), c_void_p)))
+
+
+def propsvec_to_dict(vec):
+    vectype = POINTER((POINTER(z_property_t) * vec.length))
+    props = [prop[0] for prop in cast(vec.elem, vectype)[0]]
+    return {prop.id: prop.value.elem[:prop.value.length] for prop in props}
 
 
 CHAR_PTR = POINTER(c_char)

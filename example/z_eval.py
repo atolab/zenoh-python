@@ -20,7 +20,7 @@ if __name__ == '__main__':
         uri = sys.argv[2]
 
     print("Connecting to {}...".format(locator))
-    z = Zenoh.open(locator, 'user', 'password')
+    z = Zenoh.open(locator)
 
     print("Declaring Eval on '{}'...".format(uri))
     eva = z.declare_eval(uri, query_handler)
