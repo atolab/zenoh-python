@@ -1,5 +1,6 @@
 from .binding import *
 import socket
+import time
 
 Z_USER_KEY = 0x50
 Z_PASSWD_KEY = 0x51
@@ -166,6 +167,8 @@ class Zenoh(object):
                             .format(r.value.error))
 
         self.zlib.z_start_recv_loop(self.zenoh)
+        while not self.running:
+            time.sleep(0.01)
 
     @staticmethod
     def open(locator, properties={}):
