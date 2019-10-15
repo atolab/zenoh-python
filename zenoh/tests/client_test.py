@@ -154,7 +154,7 @@ class ClientTest(unittest.TestCase):
                  dest_storages=QueryDest(QueryDest.Z_NONE),
                  dest_evals=QueryDest(QueryDest.Z_BEST_MATCH))
         replies_mvar.get()
-        # self.assertEqual(2, len(storage_replies))
+        # self.assertEqual(0, len(storage_replies))
         # This may not be true for now as :
         #  - zenoh-c does not check received query properties
         #  - zenohd does not filter out replies
@@ -189,7 +189,7 @@ class ClientTest(unittest.TestCase):
                  dest_storages=QueryDest(QueryDest.Z_NONE),
                  dest_evals=QueryDest(QueryDest.Z_BEST_MATCH))
         replies_mvar.get()
-        # self.assertEqual(2, len(storage_replies))
+        # self.assertEqual(0, len(storage_replies))
         # This may not be true for now as :
         #  - zenoh-c does not check received query properties
         #  - zenohd does not filter out replies
