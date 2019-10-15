@@ -180,7 +180,7 @@ def dict_to_propsvec(props):
     elems = [POINTER(z_property_t)(z_property_t(
                 key, z_array_uint8_t(
                         len(val),
-                        ctypes.create_string_buffer(val.encode(), len(val)))))
+                        ctypes.create_string_buffer(val, len(val)))))
              for key, val in props.items()]
     return POINTER(z_vec_t)(z_vec_t(
         length, length,

@@ -11,8 +11,8 @@ if __name__ == '__main__':
         locator = sys.argv[1]
 
     print("Connecting to {}...".format(locator))
-    z = Zenoh.open(locator, {zenoh.Z_USER_KEY: "user",
-                             zenoh.Z_PASSWD_KEY: "password"})
+    z = Zenoh.open(locator, {zenoh.Z_USER_KEY: "user".encode(),
+                             zenoh.Z_PASSWD_KEY: "password".encode()})
 
     info = z.info()
     peer = info[zenoh.Z_INFO_PEER_KEY]
