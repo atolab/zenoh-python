@@ -245,7 +245,7 @@ class z_resource_t(Structure):
     ]
 
 
-class z_array_resource_t(Structure):
+class z_array_p_resource_t(Structure):
     _fields_ = [
         ('length', c_uint),
         ('elem', POINTER(POINTER(z_resource_t)))
@@ -263,7 +263,7 @@ ZENOH_REPLY_CALLBACK_PROTO = CFUNCTYPE(None,
                                        POINTER(c_int64))
 ZENOH_SEND_REPLIES_PROTO = CFUNCTYPE(None,
                                      POINTER(c_int64),
-                                     z_array_resource_t)
+                                     z_array_p_resource_t)
 ZENOH_QUERY_HANDLER_PROTO = CFUNCTYPE(None,
                                       c_char_p,
                                       c_char_p,
@@ -295,7 +295,7 @@ def z_reply_trampoline_callback(reply_value, arg):
 
 
 def send_replies_fun(send_replies, query_handle, replies):
-    replies_array = z_array_resource_t()
+    replies_array = z_array_p_resource_t()
     replies_array.length = len(replies)
     rs = (POINTER(z_resource_t) * len(replies))()
     replies_array.elem = cast(rs, POINTER(POINTER(z_resource_t)))
