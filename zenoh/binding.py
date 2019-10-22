@@ -200,8 +200,8 @@ CHAR_PTR = POINTER(c_char)
 class z_reply_value_t(Structure):
     _fields_ = [
         ('kind', c_uint8),
-        ('stoid', CHAR_PTR),
-        ('stoid_length', c_size_t),
+        ('srcid', CHAR_PTR),
+        ('srcid_length', c_size_t),
         ('rsn', c_uint32),
         ('rname', c_char_p),
         ('data', CHAR_PTR),
@@ -213,14 +213,14 @@ class QueryReply(object):
 
     def __init__(self, zrv):
         self.kind = zrv.kind
-        self.store_id = None
+        self.source_id = None
         self.rname = None
         self.data = None
         self.info = None
 
         if(self.kind == Z_STORAGE_DATA
            or self.kind == Z_EVAL_DATA):
-            self.store_id = zrv.stoid[:zrv.stoid_length]
+            self.source_id = zrv.srcid[:zrv.srcid_length]
             self.rname = zrv.rname.decode()
             self.data = zrv.data[:zrv.data_length]
             self.info = z_data_info_t()
@@ -232,7 +232,7 @@ class QueryReply(object):
 
         elif(self.kind == Z_STORAGE_FINAL
              or self.kind == Z_EVAL_FINAL):
-            self.store_id = zrv.stoid[:zrv.stoid_length]
+            self.source_id = zrv.srcid[:zrv.srcid_length]
 
 
 class z_resource_t(Structure):
