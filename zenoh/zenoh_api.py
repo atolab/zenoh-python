@@ -11,6 +11,23 @@ Z_INFO_PEER_PID_KEY = 2
 
 
 class SubscriberMode(object):
+    """
+    An object representing a subscription mode
+    (see :func:`Zenoh.declare_subscriber`).
+
+    kind
+        One of the following:
+
+        | ``SubscriberMode.Z_PUSH_MODE``
+        | ``SubscriberMode.Z_PULL_MODE``
+        | ``SubscriberMode.Z_PERIODIC_PUSH_MODE``
+        | ``SubscriberMode.Z_PERIODIC_PULL_MODE``
+
+    tprop
+        A temporal property representing the period. `Unsupported`
+
+    """
+
     Z_PUSH_MODE = 1
     Z_PULL_MODE = 2
     Z_PERIODIC_PUSH_MODE = 3
@@ -30,14 +47,45 @@ class SubscriberMode(object):
 
     @staticmethod
     def push():
+        """
+        Return a SubscriberMode instance with `kind` =
+        ``SubscriberMode.Z_PUSH_MODE``
+
+        :returns: the equivalent of
+            ``SubscriberMode(SubscriberMode.Z_PUSH_MODE, None)``
+        """
         return SubscriberMode(SubscriberMode.Z_PUSH_MODE, None)
 
     @staticmethod
     def pull():
+        """
+        Return a SubscriberMode instance with `kind` =
+        ``SubscriberMode.Z_PULL_MODE``
+
+        :returns: the equivalent of
+            ``SubscriberMode(SubscriberMode.Z_PULL_MODE, None)``
+        """
         return SubscriberMode(SubscriberMode.Z_PULL_MODE, None)
 
 
 class QueryDest(object):
+    """
+    An object defining which storages or evals should be destination of a
+    query (see :func:`Zenoh.query`).
+
+    kind
+        One of the following:
+
+        | ``SubscriberMode.Z_BEST_MATCH``
+        | ``SubscriberMode.Z_COMPLETE``
+        | ``SubscriberMode.Z_ALL``
+        | ``SubscriberMode.Z_NONE``
+
+    nb
+        The number of storages or evals that should be destination of
+        the query when `kind` equals ``SubscriberMode.Z_COMPLETE``.
+
+    """
     Z_BEST_MATCH = 0
     Z_COMPLETE = 1
     Z_ALL = 2
@@ -69,17 +117,13 @@ def z_to_canonical_locator(locator):
 
 
 class Zenoh(object):
+    """
+    An object that represents a zenoh session.
+    """
+
     zenoh_native_lib = CDLL(zenoh_lib_path)
 
     def __init__(self, locator, properties={}):
-        """
-            Creates a zenoh runtimes and connect to the broker specified by
-            the locator using the optional user-id and password.
-
-            :param locator: the zenoh broker locator
-            :param uid: the optional user id
-            :param pwd: the optional user password
-        """
         assert(Zenoh.zenoh_native_lib is not None)
 
         self.zlib = Zenoh.zenoh_native_lib
@@ -172,9 +216,30 @@ class Zenoh(object):
 
     @staticmethod
     def open(locator, properties={}):
+        """
+        Open a zenoh session with the infrastructure component (zenoh
+        router, zenoh broker, ...) reachable at location **locator**.
+
+        :param locator: a string representation of a network endpoint.
+            A typical locator looks like this : ``tcp/127.0.0.1:7447``.
+        :param properties: a {int: bytes} dictionary of properties that will
+            be used to establish and configure the zenoh session.
+            **properties** will typically contain the username and
+            password informations needed to establish the zenoh session
+            with a secured infrastructure. It can be set to ``NULL``.
+        :returns: a handle to the zenoh session.
+
+        """
         return Zenoh(locator, properties)
 
     def info(self):
+        """
+        Return a {int: bytes} dictionary of properties containing various
+        informations about the established zenoh session.
+
+        :returns: a {int: bytes} dictionary of properties.
+
+        """
         return propsvec_to_dict(self.zlib.z_info(self.zenoh))
 
     @property
@@ -190,11 +255,11 @@ class Zenoh(object):
 
     def declare_publisher(self, res_name):
         """
-            Declares a publisher for a given resource.
+        Declare a publication for resource **res_name**.
 
-            :param res_name: the resource for which the publisher should be
-                             declared
-            :return: the publisher handle if successful.
+        :param res_name: is the resource name to publish.
+        :returns: a zenoh publisher.
+
         """
         r = self.zlib.z_declare_publisher(self.zenoh, res_name.encode())
         if r.tag == 0:
@@ -202,19 +267,23 @@ class Zenoh(object):
         else:
             raise Exception('Unable to create publisher')
 
-    def declare_subscriber(self, res_name, sub_mode, callback):
+    def declare_subscriber(self, selector, sub_mode, callback):
         """
-            Declares a subscriber for a given resource.
+        Declare a subscription for all published data matching the provided
+        resource **selector**.
 
-            :param res_name: the resource for which the subscriber should be
-                             declared
-            :return: the subscriber handle if successful.
+        :param selector: the selection of resource to subscribe to.
+        :param sub_mode: the subscription mode.
+        :param callback: the callback function that will be called each time a
+            data matching the subscribed resource is received.
+        :returns: a zenoh subscriber.
+
         """
         global subscriberCallbackMap
         h = hash(callback)
         k = POINTER(c_int64)(c_int64(h))
         r = self.zlib.z_declare_subscriber(self.zenoh,
-                                           res_name.encode(),
+                                           selector.encode(),
                                            byref(sub_mode.z_sm),
                                            z_subscriber_trampoline_callback,
                                            k)
@@ -227,15 +296,19 @@ class Zenoh(object):
 
     def declare_storage(self, selector, subscriber_callback, query_handler):
         """
-            Declares a storage for a given selector.
+        Declare a storage for all data matching the provided resource
+        **selector**.
 
-            :param selector: the resource selector used to specify the keys
-                             that will be stored in this storage
-            :subscriber_callback: a callback invoked each time data has to be
-                                  inserted in this storage
-            :query_handler: a callback called each time a query has to be
-                            answered
-            :return: a handle to the created storage
+        :param selector: the selection of resources to store.
+        :param subscriber_callback: the callback function that will be called
+            each time a data matching the stored selection is received.
+        :param query_handler: the callback function that will be called each
+            time a query for data matching the stored selection is received.
+            The **query_handler** function MUST call the provided
+            **send_replies** function with the resulting data.
+            **send_replies** can be called with an empty array.
+        :returns: a zenoh storage.
+
         """
         global replyCallbackMap
         h = hash(query_handler)
@@ -257,13 +330,17 @@ class Zenoh(object):
 
     def declare_eval(self, selector, query_handler):
         """
-            Declares an eval for a given selector.
+        Declare an eval able to provide data matching the provided resource
+        **selector**.
 
-            :param selector: the resource selector used to specify the keys
-                             that may be generated by this eval
-            :query_handler: a callback called each time a query has to be
-                            answered
-            :return: a handle to the created eval
+        :param selector: the selection of resources to evaluate.
+        :param query_handler: is the callback function that will be called
+            each time a query for data matching the evaluated **selector**
+            is received. The **query_handler** function MUST call the provided
+            **send_replies** function with the resulting data.
+            **send_replies** can be called with an empty array.
+        :returns: a zenoh eval.
+
         """
         global replyCallbackMap
         h = hash(query_handler)
@@ -282,35 +359,44 @@ class Zenoh(object):
 
     def stream_compact_data(self, pub, data):
         """
-            Stream data using the most compact message kind. In this case the
-            timestamp or the encoding are not avaialble.
+        Send data in a *compact_data* message for the resource published by
+        publisher **pub**.
 
-            :param pub: the publisher
-            :param data: the bytes containing the data to stream.
+        :param pub: the publisher to use to send data.
+        :param payload: a pointer to the data to be sent.
+        :param len: the size of the data to be sent.
+        :returns: 0 if the publication is successful.
+
         """
         self.zlib.z_stream_compact_data(pub, data, len(data))
 
     def stream_data(self, pub, data, encoding=0, kind=Z_PUT):
         """
-            Streams data.
+        Send data in a *stream_data* message for the resource published by
+        publisher **pub**.
 
-            :param pub: the publisher
-            :param data: the bytes containing the data to stream.
-            :param encoding: the encoding of the data
-            :param kind: the kind of update
+        :param pub: the publisher to use to send data.
+        :param data: the data to be sent as bytes.
+        :param encoding: a metadata information associated with the published
+            data that represents the encoding of the published data.
+        :param kind: a metadata information associated with the published
+            data that represents the kind of publication.
+        :returns: 0 if the publication is successful.
+
         """
         self.zlib.z_stream_data_wo(pub, data, len(data), encoding, kind)
 
     def write_data(self, resource, data, encoding=0, kind=Z_PUT):
         """
-            Writes data for a given resource withouth requiring the
-            declaration of a publisher. This operation should be used
-            for resources that are sporadically written.
+        Send data in a *write_data* message for the resource **resource**.
 
-            :param resource: the name of the resource
-            :param data: the bytes containing the data to stream
-            :param encoding: the encoding of the data
-            :param kind: the kind of update
+        :param resource: the resource name of the data to be sent.
+        :param data: the data to be sent as bytes.
+        :param encoding: a metadata information associated with the published
+            data that represents the encoding of the published data.
+        :param kind: a metadata information associated with the published
+            data that represents the kind of publication.
+        :returns: 0 if the publication is successful.
         """
         self.zlib.z_write_data_wo(self.zenoh,
                                   resource.encode(),
@@ -321,30 +407,40 @@ class Zenoh(object):
 
     def pull(self, sub):
         """
-            Retrives data for a given pull-mode subscription from
-            the nearest infrastruture component (router).
+        Pull data for the `Z_PULL_MODE` or `Z_PERIODIC_PULL_MODE` subscribtion
+        **sub** from the nearest infrastruture component. The pulled data will
+        be provided by calling the **data_handler** function provided to the
+        **declare_subscriber** function.
 
-            :param sub: the concerned pull-mode subscription
+        :param sub: the subscribtion to pull from.
+        :returns: 0 if pull is successful.
         """
         self.zlib.z_pull(sub)
 
-    def query(self, resource, predicate, callback,
+    def query(self, selector, predicate, callback,
               dest_storages=QueryDest(QueryDest.Z_BEST_MATCH),
               dest_evals=QueryDest(QueryDest.Z_BEST_MATCH)):
         """
-            Execute a query for a resource selector with a given predicate.
+        Query data matching selection **selector**.
 
-            :param resource: the resource selector
-            :param predicate: the predicate
-            :param dest_storages: the storages that should reply to this query
-            :param dest_evals: the evals that should reply to this query
+        :param selector: the selection of resource to query.
+        :param predicate: a string that will be  propagated to the storages
+            and evals that should provide the queried data. It may allow them
+            to filter, transform and/or compute the queried data.
+        :param reply_handler: the callback function that will be called on
+            reception of the replies of the query.
+        :param dest_storages: indicates which matching storages should be
+            destination of the query (see :class:`QueryDest`).
+        :param dest_evals: indicates which matching evals should be
+            destination of the query (see :class:`QueryDest`).
+        :returns: 0 if the query is sent successfully.
         """
         global replyCallbackMap
         h = hash(callback)
         k = POINTER(c_int64)(c_int64(h))
         replyCallbackMap[h] = (k, callback)
         r = self.zlib.z_query_wo(self.zenoh,
-                                 resource.encode(),
+                                 selector.encode(),
                                  predicate.encode(),
                                  z_reply_trampoline_callback,
                                  k,
@@ -355,20 +451,48 @@ class Zenoh(object):
             raise Exception('Unable to create query')
 
     def undeclare_publisher(self, pub):
+        """
+        Undeclare the publication **pub**.
+
+        :param pub: the publication to undeclare.
+        :returns: 0 when successful.
+
+        """
         self.zlib.z_undeclare_publisher(pub)
 
     def undeclare_subscriber(self, sub):
+        """
+        Undeclare the subscrbtion **sub**.
+
+        :param sub: the subscription to undeclare.
+        :returns: 0 when successful.
+
+        """
         self.zlib.z_undeclare_subscriber(sub)
 
     def undeclare_storage(self, sto):
+        """
+        Undeclare the storage **sto**.
+
+        :param sto: the storage to undeclare.
+        :returns: 0 when successful.
+
+        """
         self.zlib.z_undeclare_storage(sto)
 
     def undeclare_eval(self, eval):
+        """
+        Undeclare the eval **eval**.
+
+        :param eval: the eval to undeclare.
+        :returns: 0 when successful.
+
+        """
         self.zlib.z_undeclare_eval(eval)
 
     def close(self):
         """
-            Closes the zenoh session.
+            Close the zenoh session.
         """
         self.zlib.z_close(self.zenoh)
         self.zlib.z_stop_recv_loop(self.zenoh)

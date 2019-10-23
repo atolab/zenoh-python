@@ -136,6 +136,18 @@ class z_data_info_t(Structure):
 
 
 class DataInfo():
+    """
+    An object containing meta informations about some associated data.
+
+    kind
+        The kind of the data.
+    encoding
+        The encoding of the data.
+    tstamp
+        The unique timestamp at which the data was produced.
+
+    """
+
     def __init__(self, kind=None, encoding=None, tstamp=None):
         self.kind = kind
         self.tstamp = tstamp
@@ -210,6 +222,40 @@ class z_reply_value_t(Structure):
 
 
 class QueryReply(object):
+    """
+    An object containing one of the replies to a :func:`Zenoh.query`.
+
+    kind
+        One of the following:
+
+        | ``Z_STORAGE_DATA`` the reply contains some data from a storage.
+        | ``Z_STORAGE_FINAL`` the reply indicates that no more data is
+            expected from the specified storage.
+        | ``Z_EVAL_DATA`` the reply contains some data from an eval.
+        | ``Z_EVAL_FINAL`` the reply indicates that no more data is expected
+            from the specified eval.
+        | ``Z_REPLY_FINAL`` the reply indicates that no more replies are
+            expected for the query.
+
+    source_id
+        The unique identifier of the storage or eval that sent the reply
+        when `kind` equals ``Z_STORAGE_DATA``, ``Z_STORAGE_FINAL``,
+        ``Z_EVAL_DATA`` or ``Z_EVAL_FINAL``.
+    seq_num
+        The sequence number of the reply from the identified storage or
+        eval when `kind` equals ``Z_STORAGE_DATA``, ``Z_STORAGE_FINAL``,
+        ``Z_EVAL_DATA`` or ``Z_EVAL_FINAL``.
+    rname
+        The resource name of the received data when `kind` equals
+        ``Z_STORAGE_DATA`` or ``Z_EVAL_DATA``.
+    data
+        The received data when `kind` equals ``Z_STORAGE_DATA`` or
+        ``Z_EVAL_DATA``.
+    info
+        A :class:`DataInfo` object holding meta information about the received
+        data when `kind` equals ``Z_STORAGE_DATA`` or ``Z_EVAL_DATA``.
+
+    """
 
     def __init__(self, zrv):
         self.kind = zrv.kind
