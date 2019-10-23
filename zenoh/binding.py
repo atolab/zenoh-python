@@ -214,6 +214,7 @@ class QueryReply(object):
     def __init__(self, zrv):
         self.kind = zrv.kind
         self.source_id = None
+        self.seq_num = None
         self.rname = None
         self.data = None
         self.info = None
@@ -221,6 +222,7 @@ class QueryReply(object):
         if(self.kind == Z_STORAGE_DATA
            or self.kind == Z_EVAL_DATA):
             self.source_id = zrv.srcid[:zrv.srcid_length]
+            self.seq_num = zrv.rsn
             self.rname = zrv.rname.decode()
             self.data = zrv.data[:zrv.data_length]
             self.info = z_data_info_t()
