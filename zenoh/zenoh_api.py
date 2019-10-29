@@ -124,7 +124,7 @@ class Zenoh(object):
     zenoh_native_lib = None
 
     def __init__(self, locator, properties={}):
-        if Zenoh.zenoh_native_lib == None:
+        if Zenoh.zenoh_native_lib is None:
             Zenoh.zenoh_native_lib = CDLL(zenoh_lib_path)
 
         self.zlib = Zenoh.zenoh_native_lib
