@@ -121,10 +121,11 @@ class Zenoh(object):
     An object that represents a zenoh session.
     """
 
-    zenoh_native_lib = CDLL(zenoh_lib_path)
+    zenoh_native_lib = None
 
     def __init__(self, locator, properties={}):
-        assert(Zenoh.zenoh_native_lib is not None)
+        if Zenoh.zenoh_native_lib == None:
+            Zenoh.zenoh_native_lib = CDLL(zenoh_lib_path)
 
         self.zlib = Zenoh.zenoh_native_lib
 
