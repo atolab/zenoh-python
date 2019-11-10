@@ -23,7 +23,7 @@ if __name__ == '__main__':
     print("Declaring Subscriber on '{}'...".format(uri))
     sub = z.declare_subscriber(uri, SubscriberMode.pull(), listener)
 
-    print("Press <enter> to pull data...");
+    print("Press <enter> to pull data...")
     c = '\0'
     while c != 'q':
         c = sys.stdin.read(1)
