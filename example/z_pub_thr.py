@@ -2,7 +2,7 @@ import sys
 from zenoh import Zenoh
 
 if __name__ == '__main__':
-    locator = "tcp/127.0.0.1:7447"
+    locator = None
     if len(sys.argv) < 2:
         print('USAGE:\n\tz_pub_thr <payload-size> [<zenoh-locator>]\n\n')
         sys.exit(-1)

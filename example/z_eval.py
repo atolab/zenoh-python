@@ -11,7 +11,7 @@ def query_handler(path_selector, content_selector, send_replies):
 
 
 if __name__ == '__main__':
-    locator = "tcp/127.0.0.1:7447"
+    locator = None
     if len(sys.argv) > 1:
         locator = sys.argv[1]
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 2:
         uri = sys.argv[2]
 
-    print("Connecting to {}...".format(locator))
+    print("Openning session...")
     z = Zenoh.open(locator)
 
     print("Declaring Eval on '{}'...".format(uri))

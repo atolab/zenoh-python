@@ -98,22 +98,23 @@ class QueryDest(object):
 
 
 def z_to_canonical_locator(locator):
-    locator = locator or ''
+    if locator is None:
+        return None
     locator = locator.strip()
     a, b, c = locator.partition('/')
     if a == 'tcp' and b == '/':
         h, s, p = c.partition(':')
         if s == ':' and p != '':
-            return 'tcp/' + socket.gethostbyname(h) + ':' + p
+            return ('tcp/' + socket.gethostbyname(h) + ':' + p).encode()
         else:
             raise Exception('Invalid locator format {}, it should be '
                             'tcp/<ip-addr|host-name>:port'.format(locator))
     elif b == '':
         h, s, p = locator.partition(':')
         if s == ':':
-            return 'tcp/' + socket.gethostbyname(h) + ':' + p
+            return ('tcp/' + socket.gethostbyname(h) + ':' + p).encode()
         else:
-            return 'tcp/' + socket.gethostbyname(h) + ':' + str(7447)
+            return ('tcp/' + socket.gethostbyname(h) + ':7447').encode()
 
 
 class Zenoh(object):
@@ -203,7 +204,7 @@ class Zenoh(object):
 
         loc = z_to_canonical_locator(locator)
 
-        r = self.zlib.z_open(loc.encode(), 0, dict_to_propsvec(properties))
+        r = self.zlib.z_open(loc, 0, dict_to_propsvec(properties))
         if r.tag == Z_OK_TAG:
             self.zenoh = r.value.zenoh
             self.connected = True

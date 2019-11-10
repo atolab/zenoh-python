@@ -4,7 +4,7 @@ from zenoh import Zenoh
 
 
 if __name__ == '__main__':
-    locator = "tcp/127.0.0.1:7447"
+    locator = None
     if len(sys.argv) > 1:
         locator = sys.argv[1]
 
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 3:
         value = sys.argv[3]
 
-    print("Connecting to {}...".format(locator))
+    print("Openning session...")
     z = Zenoh.open(locator)
 
     print("Writing Data ('{}': '{}')...".format(uri, value))

@@ -28,7 +28,7 @@ def listener(rname, data, info):
 
 
 if __name__ == '__main__':
-    locator = "tcp/127.0.0.1:7447"
+    locator = None
     if len(sys.argv) > 1:
         locator = sys.argv[1]
 
