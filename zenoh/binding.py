@@ -3,6 +3,7 @@ import os
 import ctypes
 import datetime
 import binascii
+import traceback
 from ctypes import *
 from functools import partial
 
@@ -438,5 +439,11 @@ def z_query_handler_trampoline(rname,
     global queryHandlerMap
     key = arg.contents.value
     _, handler = queryHandlerMap[key]
-    handler(rname.decode(), predicate.decode(),
-            partial(send_replies_fun, send_replies, query_handle))
+    try:
+        handler(rname.decode(), predicate.decode(),
+                partial(send_replies_fun, send_replies, query_handle))
+    except Exception:
+        print('WARNING: error in query handle for {} :\n{}'
+              .format(rname.decode(), traceback.format_exc()))
+    finally:
+        send_replies_fun(send_replies, query_handle, [])
