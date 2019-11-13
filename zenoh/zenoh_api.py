@@ -217,7 +217,7 @@ class Zenoh(object):
             time.sleep(0.01)
 
     @staticmethod
-    def open(locator, properties={}):
+    def open(locator=None, properties={}):
         """
         Open a zenoh session with the infrastructure component (zenoh
         router, zenoh broker, ...) reachable at location **locator**.
