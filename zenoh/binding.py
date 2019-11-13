@@ -445,5 +445,4 @@ def z_query_handler_trampoline(rname,
     except Exception:
         print('WARNING: error in query handle for {} :\n{}'
               .format(rname.decode(), traceback.format_exc()))
-    finally:
         send_replies_fun(send_replies, query_handle, [])
