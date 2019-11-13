@@ -219,11 +219,12 @@ class Zenoh(object):
     @staticmethod
     def open(locator=None, properties={}):
         """
-        Open a zenoh session with the infrastructure component (zenoh
-        router, zenoh broker, ...) reachable at location **locator**.
+        Open a zenoh session.
 
-        :param locator: a string representation of a network endpoint.
-            A typical locator looks like this : ``tcp/127.0.0.1:7447``.
+        :param locator: a string representing the network endpoint to which
+            establish the session. A typical locator looks like this :
+            ``tcp/127.0.0.1:7447``. If ``None``, :func:`open` will scout and
+            try to establish the session automatically.
         :param properties: a {int: bytes} dictionary of properties that will
             be used to establish and configure the zenoh session.
             **properties** will typically contain the username and
