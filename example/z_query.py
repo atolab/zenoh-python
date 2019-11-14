@@ -20,13 +20,13 @@ def reply_handler(reply):
 
 
 if __name__ == '__main__':
-    locator = None
-    if len(sys.argv) > 1:
-        locator = sys.argv[1]
-
     uri = "/demo/example/**"
+    if len(sys.argv) > 1:
+        uri = sys.argv[1]
+
+    locator = None
     if len(sys.argv) > 2:
-        uri = sys.argv[2]
+        locator = sys.argv[2]
 
     print("Openning session...")
     z = Zenoh.open(locator)
