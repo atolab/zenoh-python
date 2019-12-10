@@ -282,7 +282,7 @@ class z_reply_value_t(Structure):
 
 class QueryReply(object):
     """
-    An object containing one of the replies to a :func:`Zenoh.query`.
+    An object containing one of the replies to a :func:`Session.query`.
 
     kind
         One of the following:

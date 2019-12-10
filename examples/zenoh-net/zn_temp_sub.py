@@ -1,4 +1,4 @@
-from zenoh import Zenoh, SubscriberMode
+from zenoh.net import Session, SubscriberMode
 import time
 import sys
 
@@ -12,12 +12,12 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         locator = sys.argv[1]
 
-    z = Zenoh.open(locator)
-    sub = z.declare_subscriber('/myhome/kitcken/temp',
+    s = Session.open(locator)
+    sub = s.declare_subscriber('/myhome/kitcken/temp',
                                SubscriberMode.push(),
                                listener)
 
     # Listen for one minute and then exit
     time.sleep(120)
-    z.undeclare_subscriber(sub)
-    z.close()
+    s.undeclare_subscriber(sub)
+    s.close()

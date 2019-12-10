@@ -1,6 +1,6 @@
 import sys
 import time
-from zenoh import Zenoh, QueryDest
+from zenoh.net import Session, QueryDest
 import zenoh
 
 
@@ -29,13 +29,13 @@ if __name__ == '__main__':
         locator = sys.argv[2]
 
     print("Openning session...")
-    z = Zenoh.open(locator)
+    s = Session.open(locator)
 
     print("Sending query '{}'...".format(uri))
-    z.query(uri, "", reply_handler,
+    s.query(uri, "", reply_handler,
             dest_storages=QueryDest(QueryDest.Z_ALL),
             dest_evals=QueryDest(QueryDest.Z_ALL))
 
     time.sleep(1)
 
-    z.close()
+    s.close()

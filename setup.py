@@ -10,8 +10,8 @@ def read(fname):
 
 setup(
     name='zenoh',
-    version='0.3.1',
-    packages=['zenoh'],
+    version='0.4.0',
+    packages=['zenoh', 'zenoh.net'],
     author='kydos',
     description="Python client API for zenoh",
     long_description=read('README.md'),

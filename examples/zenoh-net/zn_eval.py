@@ -1,6 +1,6 @@
 import sys
 import time
-from zenoh import Zenoh, DataInfo, Z_PUT
+from zenoh.net import Session, DataInfo, Z_PUT
 
 
 def query_handler(path_selector, content_selector, send_replies):
@@ -20,14 +20,14 @@ if __name__ == '__main__':
         locator = sys.argv[2]
 
     print("Openning session...")
-    z = Zenoh.open(locator)
+    s = Session.open(locator)
 
     print("Declaring Eval on '{}'...".format(uri))
-    eva = z.declare_eval(uri, query_handler)
+    eva = s.declare_eval(uri, query_handler)
 
     c = '\0'
     while c != 'q':
         c = sys.stdin.read(1)
 
-    z.undeclare_eval(eva)
-    z.close()
+    s.undeclare_eval(eva)
+    s.close()

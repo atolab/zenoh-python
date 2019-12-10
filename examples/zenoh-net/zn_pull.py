@@ -1,6 +1,6 @@
 import sys
 import time
-from zenoh import Zenoh, SubscriberMode
+from zenoh.net import Session, SubscriberMode
 
 
 def listener(rname, data, info):
@@ -18,16 +18,16 @@ if __name__ == '__main__':
         locator = sys.argv[2]
 
     print("Openning session...")
-    z = Zenoh.open(locator)
+    s = Session.open(locator)
 
     print("Declaring Subscriber on '{}'...".format(uri))
-    sub = z.declare_subscriber(uri, SubscriberMode.pull(), listener)
+    sub = s.declare_subscriber(uri, SubscriberMode.pull(), listener)
 
     print("Press <enter> to pull data...")
     c = '\0'
     while c != 'q':
         c = sys.stdin.read(1)
-        z.pull(sub)
+        s.pull(sub)
 
-    z.undeclare_subscriber(sub)
-    z.close()
+    s.undeclare_subscriber(sub)
+    s.close()

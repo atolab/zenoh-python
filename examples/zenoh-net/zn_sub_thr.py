@@ -1,7 +1,7 @@
 import sys
 import time
 import datetime
-from zenoh import Zenoh, SubscriberMode
+from zenoh.net import Session, SubscriberMode
 
 N = 100000
 
@@ -32,10 +32,10 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         locator = sys.argv[1]
 
-    z = Zenoh.open(locator)
-    sub = z.declare_subscriber('/test/thr', SubscriberMode.push(), listener)
+    s = Session.open(locator)
+    sub = s.declare_subscriber('/test/thr', SubscriberMode.push(), listener)
 
     time.sleep(60)
 
-    z.undeclare_subscriber(sub)
-    z.close()
+    s.undeclare_subscriber(sub)
+    s.close()

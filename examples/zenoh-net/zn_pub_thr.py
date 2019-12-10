@@ -1,5 +1,5 @@
 import sys
-from zenoh import Zenoh
+from zenoh.net import Session
 
 if __name__ == '__main__':
     locator = None
@@ -11,14 +11,14 @@ if __name__ == '__main__':
     if len(sys.argv) > 2:
         locator = sys.argv[2]
 
-    z = Zenoh.open(locator)
-    pub = z.declare_publisher('/test/thr')
+    s = Session.open(locator)
+    pub = s.declare_publisher('/test/thr')
 
     bs = bytearray()
     for i in range(0, size):
         bs.append(i % 10)
 
     while True:
-        z.stream_data(pub, bytes(bs))
+        s.stream_data(pub, bytes(bs))
 
-    z.close()
+    s.close()

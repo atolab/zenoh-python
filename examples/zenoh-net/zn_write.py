@@ -1,6 +1,6 @@
 import sys
 import time
-from zenoh import Zenoh
+from zenoh.net import Session
 
 
 if __name__ == '__main__':
@@ -17,9 +17,9 @@ if __name__ == '__main__':
         locator = sys.argv[3]
 
     print("Openning session...")
-    z = Zenoh.open(locator)
+    s = Session.open(locator)
 
     print("Writing Data ('{}': '{}')...".format(uri, value))
-    z.write_data(uri, bytes(value, encoding='utf8'))
+    s.write_data(uri, bytes(value, encoding='utf8'))
 
-    z.close()
+    s.close()

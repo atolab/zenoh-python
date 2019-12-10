@@ -13,7 +13,7 @@ Z_INFO_PEER_PID_KEY = 2
 class SubscriberMode(object):
     """
     An object representing a subscription mode
-    (see :func:`Zenoh.declare_subscriber`).
+    (see :func:`Session.declare_subscriber`).
 
     kind
         One of the following:
@@ -71,7 +71,7 @@ class SubscriberMode(object):
 class QueryDest(object):
     """
     An object defining which storages or evals should be destination of a
-    query (see :func:`Zenoh.query`).
+    query (see :func:`Session.query`).
 
     kind
         One of the following:
@@ -117,7 +117,14 @@ def z_to_canonical_locator(locator):
             return ('tcp/' + socket.gethostbyname(h) + ':7447').encode()
 
 
-class Zenoh(object):
+def rname_intersect(a, b):
+    if Session.zenoh_native_lib.intersect(a.encode(), b.encode()) == 1:
+        return True
+    else:
+        return False
+
+
+class Session(object):
     """
     An object that represents a zenoh session.
     """
@@ -125,10 +132,10 @@ class Zenoh(object):
     zenoh_native_lib = None
 
     def __init__(self, locator, properties={}):
-        if Zenoh.zenoh_native_lib is None:
-            Zenoh.zenoh_native_lib = CDLL(zenoh_lib_path)
+        if Session.zenoh_native_lib is None:
+            Session.zenoh_native_lib = CDLL(zenoh_lib_path)
 
-        self.zlib = Zenoh.zenoh_native_lib
+        self.zlib = Session.zenoh_native_lib
 
         self.zlib.z_open.restype = z_zenoh_p_result_t
         self.zlib.z_open.argtypes = [c_char_p, c_void_p, POINTER(z_vec_t)]
@@ -233,7 +240,7 @@ class Zenoh(object):
         :returns: a handle to the zenoh session.
 
         """
-        return Zenoh(locator, properties)
+        return Session(locator, properties)
 
     def info(self):
         """
@@ -248,13 +255,6 @@ class Zenoh(object):
     @property
     def running(self):
         return (self.zlib.z_running(self.zenoh) != 0)
-
-    @staticmethod
-    def intersect(a, b):
-        if Zenoh.zenoh_native_lib.intersect(a.encode(), b.encode()) == 1:
-            return True
-        else:
-            return False
 
     def declare_publisher(self, res_name):
         """

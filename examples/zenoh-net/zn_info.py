@@ -2,7 +2,7 @@ import sys
 import time
 import binascii
 import zenoh
-from zenoh import Zenoh
+from zenoh.net import Session
 
 
 if __name__ == '__main__':
@@ -11,10 +11,10 @@ if __name__ == '__main__':
         locator = sys.argv[1]
 
     print("Openning session...")
-    z = Zenoh.open(locator, {zenoh.Z_USER_KEY: "user".encode(),
-                             zenoh.Z_PASSWD_KEY: "password".encode()})
+    s = Session.open(locator, {zenoh.Z_USER_KEY: "user".encode(),
+                               zenoh.Z_PASSWD_KEY: "password".encode()})
 
-    info = z.info()
+    info = s.info()
     peer = info[zenoh.Z_INFO_PEER_KEY]
     pid = info[zenoh.Z_INFO_PID_KEY]
     peer_pid = info[zenoh.Z_INFO_PEER_PID_KEY]
@@ -22,4 +22,4 @@ if __name__ == '__main__':
     print("PID :      {}".format(binascii.hexlify(pid).decode("ascii")))
     print("PEER PID : {}".format(binascii.hexlify(peer_pid).decode("ascii")))
 
-    z.close()
+    s.close()

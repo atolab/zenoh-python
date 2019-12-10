@@ -1,6 +1,6 @@
 import sys
 import time
-from zenoh import Zenoh
+from zenoh.net import Session, rname_intersect
 
 store = {}
 
@@ -16,7 +16,7 @@ def query_handler(path_selector, content_selector, send_replies):
           .format(path_selector, content_selector))
     replies = []
     for k, v in store.items():
-        if Zenoh.intersect(path_selector, k):
+        if rname_intersect(path_selector, k):
             replies.append((k, v))
     send_replies(replies)
 
@@ -31,14 +31,14 @@ if __name__ == '__main__':
         locator = sys.argv[2]
 
     print("Openning session...")
-    z = Zenoh.open(locator)
+    s = Session.open(locator)
 
     print("Declaring Storage on '{}'...".format(uri))
-    sto = z.declare_storage(uri, listener, query_handler)
+    sto = s.declare_storage(uri, listener, query_handler)
 
     c = '\0'
     while c != 'q':
         c = sys.stdin.read(1)
 
-    z.undeclare_storage(sto)
-    z.close()
+    s.undeclare_storage(sto)
+    s.close()
