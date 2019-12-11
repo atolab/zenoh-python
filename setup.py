@@ -17,6 +17,7 @@ setup(
     long_description=read('README.md'),
     long_description_content_type="text/markdown",
     url='https://github.com/atolab/zenoh-python',
+    install_requires=['hexdump', 'mvar', 'papero==0.2.7'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Intended Audience :: Developers",
