@@ -2,12 +2,12 @@ from .binding import *
 import socket
 import time
 
-Z_USER_KEY = 0x50
-Z_PASSWD_KEY = 0x51
+ZN_USER_KEY = 0x50
+ZN_PASSWD_KEY = 0x51
 
-Z_INFO_PID_KEY = 0
-Z_INFO_PEER_KEY = 1
-Z_INFO_PEER_PID_KEY = 2
+ZN_INFO_PID_KEY = 0
+ZN_INFO_PEER_KEY = 1
+ZN_INFO_PEER_PID_KEY = 2
 
 
 class SubscriberMode(object):
@@ -18,54 +18,54 @@ class SubscriberMode(object):
     kind
         One of the following:
 
-        | ``SubscriberMode.Z_PUSH_MODE``
-        | ``SubscriberMode.Z_PULL_MODE``
-        | ``SubscriberMode.Z_PERIODIC_PUSH_MODE``
-        | ``SubscriberMode.Z_PERIODIC_PULL_MODE``
+        | ``SubscriberMode.ZN_PUSH_MODE``
+        | ``SubscriberMode.ZN_PULL_MODE``
+        | ``SubscriberMode.ZN_PERIODIC_PUSH_MODE``
+        | ``SubscriberMode.ZN_PERIODIC_PULL_MODE``
 
     tprop
         A temporal property representing the period. `Unsupported`
 
     """
 
-    Z_PUSH_MODE = 1
-    Z_PULL_MODE = 2
-    Z_PERIODIC_PUSH_MODE = 3
-    Z_PERIODIC_PULL_MODE = 4
+    ZN_PUSH_MODE = 1
+    ZN_PULL_MODE = 2
+    ZN_PERIODIC_PUSH_MODE = 3
+    ZN_PERIODIC_PULL_MODE = 4
 
     def __init__(self, kind, tprop):
-        self.z_sm = z_sub_mode_t()
-        self.z_sm.kind = c_uint8(kind)
-        self.z_sm.tprop.origin = 0
-        self.z_sm.tprop.period = 0
-        self.z_sm.tprop.duration = 0
+        self.zn_sm = zn_sub_mode_t()
+        self.zn_sm.kind = c_uint8(kind)
+        self.zn_sm.tprop.origin = 0
+        self.zn_sm.tprop.period = 0
+        self.zn_sm.tprop.duration = 0
 
         if tprop is not None:
-            self.z_sm.tprop.origin = tprop.origin
-            self.z_sm.tprop.period = tprop.period
-            self.z_sm.tprop.duration = tprop.duration
+            self.zn_sm.tprop.origin = tprop.origin
+            self.zn_sm.tprop.period = tprop.period
+            self.zn_sm.tprop.duration = tprop.duration
 
     @staticmethod
     def push():
         """
         Return a SubscriberMode instance with `kind` =
-        ``SubscriberMode.Z_PUSH_MODE``
+        ``SubscriberMode.ZN_PUSH_MODE``
 
         :returns: the equivalent of
-            ``SubscriberMode(SubscriberMode.Z_PUSH_MODE, None)``
+            ``SubscriberMode(SubscriberMode.ZN_PUSH_MODE, None)``
         """
-        return SubscriberMode(SubscriberMode.Z_PUSH_MODE, None)
+        return SubscriberMode(SubscriberMode.ZN_PUSH_MODE, None)
 
     @staticmethod
     def pull():
         """
         Return a SubscriberMode instance with `kind` =
-        ``SubscriberMode.Z_PULL_MODE``
+        ``SubscriberMode.ZN_PULL_MODE``
 
         :returns: the equivalent of
-            ``SubscriberMode(SubscriberMode.Z_PULL_MODE, None)``
+            ``SubscriberMode(SubscriberMode.ZN_PULL_MODE, None)``
         """
-        return SubscriberMode(SubscriberMode.Z_PULL_MODE, None)
+        return SubscriberMode(SubscriberMode.ZN_PULL_MODE, None)
 
 
 class QueryDest(object):
@@ -76,28 +76,28 @@ class QueryDest(object):
     kind
         One of the following:
 
-        | ``SubscriberMode.Z_BEST_MATCH``
-        | ``SubscriberMode.Z_COMPLETE``
-        | ``SubscriberMode.Z_ALL``
-        | ``SubscriberMode.Z_NONE``
+        | ``SubscriberMode.ZN_BEST_MATCH``
+        | ``SubscriberMode.ZN_COMPLETE``
+        | ``SubscriberMode.ZN_ALL``
+        | ``SubscriberMode.ZN_NONE``
 
     nb
         The number of storages or evals that should be destination of
-        the query when `kind` equals ``SubscriberMode.Z_COMPLETE``.
+        the query when `kind` equals ``SubscriberMode.ZN_COMPLETE``.
 
     """
-    Z_BEST_MATCH = 0
-    Z_COMPLETE = 1
-    Z_ALL = 2
-    Z_NONE = 3
+    ZN_BEST_MATCH = 0
+    ZN_COMPLETE = 1
+    ZN_ALL = 2
+    ZN_NONE = 3
 
     def __init__(self, kind, nb=1):
-        self.z_qd = z_query_dest_t()
-        self.z_qd.kind = kind
-        self.z_qd.nb = nb
+        self.zn_qd = zn_query_dest_t()
+        self.zn_qd.kind = kind
+        self.zn_qd.nb = nb
 
 
-def z_to_canonical_locator(locator):
+def zn_to_canonical_locator(locator):
     if locator is None:
         return None
     locator = locator.strip()
@@ -117,8 +117,9 @@ def z_to_canonical_locator(locator):
             return ('tcp/' + socket.gethostbyname(h) + ':7447').encode()
 
 
-def rname_intersect(a, b):
-    if Session.zenoh_native_lib.intersect(a.encode(), b.encode()) == 1:
+def zn_rname_intersect(a, b):
+    if Session.zenohc_native_lib.zn_rname_intersect(
+        a.encode(), b.encode()) == 1:
         return True
     else:
         return False
@@ -129,97 +130,97 @@ class Session(object):
     An object that represents a zenoh session.
     """
 
-    zenoh_native_lib = None
+    zenohc_native_lib = None
 
     def __init__(self, locator, properties={}):
-        if Session.zenoh_native_lib is None:
-            Session.zenoh_native_lib = CDLL(zenoh_lib_path)
+        if Session.zenohc_native_lib is None:
+            Session.zenohc_native_lib = CDLL(zenohc_lib_path)
 
-        self.zlib = Session.zenoh_native_lib
+        self.zlib = Session.zenohc_native_lib
 
-        self.zlib.z_open.restype = z_zenoh_p_result_t
-        self.zlib.z_open.argtypes = [c_char_p, c_void_p, POINTER(z_vec_t)]
+        self.zlib.zn_open.restype = zn_session_p_result_t
+        self.zlib.zn_open.argtypes = [c_char_p, c_void_p, POINTER(z_vec_t)]
 
-        self.zlib.z_info.restype = z_vec_t
-        self.zlib.z_info.argtypes = [c_void_p]
+        self.zlib.zn_info.restype = z_vec_t
+        self.zlib.zn_info.argtypes = [c_void_p]
 
-        self.zlib.z_running.restype = c_int
-        self.zlib.z_running.argtypes = [c_void_p]
+        self.zlib.zn_running.restype = c_int
+        self.zlib.zn_running.argtypes = [c_void_p]
 
-        self.zlib.z_declare_subscriber.restype = z_sub_p_result_t
-        self.zlib.z_declare_subscriber.argtypes = [
-            c_void_p, c_char_p, POINTER(z_sub_mode_t),
+        self.zlib.zn_declare_subscriber.restype = zn_sub_p_result_t
+        self.zlib.zn_declare_subscriber.argtypes = [
+            c_void_p, c_char_p, POINTER(zn_sub_mode_t),
             ZENOH_SUBSCRIBER_CALLBACK_PROTO, POINTER(c_int64)]
 
-        self.zlib.z_declare_storage.restype = z_sto_p_result_t
-        self.zlib.z_declare_storage.argtypes = [
+        self.zlib.zn_declare_storage.restype = zn_sto_p_result_t
+        self.zlib.zn_declare_storage.argtypes = [
             c_void_p, c_char_p, ZENOH_SUBSCRIBER_CALLBACK_PROTO,
             ZENOH_QUERY_HANDLER_PROTO, POINTER(c_int64)]
 
-        self.zlib.z_declare_eval.restype = z_eval_p_result_t
-        self.zlib.z_declare_eval.argtypes = [
+        self.zlib.zn_declare_eval.restype = zn_eval_p_result_t
+        self.zlib.zn_declare_eval.argtypes = [
             c_void_p, c_char_p, ZENOH_QUERY_HANDLER_PROTO,
             POINTER(c_int64)]
 
-        self.zlib.z_declare_publisher.restype = z_pub_p_result_t
-        self.zlib.z_declare_publisher.argtypes = [c_void_p, c_char_p]
+        self.zlib.zn_declare_publisher.restype = zn_pub_p_result_t
+        self.zlib.zn_declare_publisher.argtypes = [c_void_p, c_char_p]
 
-        self.zlib.z_start_recv_loop.restype = c_int
-        self.zlib.z_start_recv_loop.argtypes = [c_void_p]
+        self.zlib.zn_start_recv_loop.restype = c_int
+        self.zlib.zn_start_recv_loop.argtypes = [c_void_p]
 
-        self.zlib.z_stop_recv_loop.restype = c_int
-        self.zlib.z_stop_recv_loop.argtypes = [c_void_p]
+        self.zlib.zn_stop_recv_loop.restype = c_int
+        self.zlib.zn_stop_recv_loop.argtypes = [c_void_p]
 
-        self.zlib.z_stream_compact_data.restype = c_int
-        self.zlib.z_stream_compact_data.argtypes = [
+        self.zlib.zn_stream_compact_data.restype = c_int
+        self.zlib.zn_stream_compact_data.argtypes = [
             c_void_p, POINTER(c_char), c_int]
 
-        self.zlib.z_stream_data_wo.restype = c_int
-        self.zlib.z_stream_data_wo.argtypes = [
+        self.zlib.zn_stream_data_wo.restype = c_int
+        self.zlib.zn_stream_data_wo.argtypes = [
             c_void_p, c_char_p, c_int, c_uint8, c_uint8]
 
-        self.zlib.z_write_data_wo.restype = c_int
-        self.zlib.z_write_data_wo.argtypes = [
+        self.zlib.zn_write_data_wo.restype = c_int
+        self.zlib.zn_write_data_wo.argtypes = [
             c_void_p, c_char_p, c_char_p, c_int, c_uint8, c_uint8]
 
-        self.zlib.z_pull.restype = c_int
-        self.zlib.z_pull.argtypes = [c_void_p]
+        self.zlib.zn_pull.restype = c_int
+        self.zlib.zn_pull.argtypes = [c_void_p]
 
-        self.zlib.z_query_wo.restype = c_int
-        self.zlib.z_query_wo.argtypes = [
+        self.zlib.zn_query_wo.restype = c_int
+        self.zlib.zn_query_wo.argtypes = [
             c_void_p, c_char_p, c_char_p,
             ZENOH_REPLY_CALLBACK_PROTO, POINTER(c_int64),
-            z_query_dest_t, z_query_dest_t]
+            zn_query_dest_t, zn_query_dest_t]
 
-        self.zlib.z_undeclare_subscriber.restype = c_int
-        self.zlib.z_undeclare_subscriber.argtypes = [c_void_p]
+        self.zlib.zn_undeclare_subscriber.restype = c_int
+        self.zlib.zn_undeclare_subscriber.argtypes = [c_void_p]
 
-        self.zlib.z_undeclare_storage.restype = c_int
-        self.zlib.z_undeclare_storage.argtypes = [c_void_p]
+        self.zlib.zn_undeclare_storage.restype = c_int
+        self.zlib.zn_undeclare_storage.argtypes = [c_void_p]
 
-        self.zlib.z_undeclare_eval.restype = c_int
-        self.zlib.z_undeclare_eval.argtypes = [c_void_p]
+        self.zlib.zn_undeclare_eval.restype = c_int
+        self.zlib.zn_undeclare_eval.argtypes = [c_void_p]
 
-        self.zlib.z_undeclare_publisher.restype = c_int
-        self.zlib.z_undeclare_publisher.argtypes = [c_void_p]
+        self.zlib.zn_undeclare_publisher.restype = c_int
+        self.zlib.zn_undeclare_publisher.argtypes = [c_void_p]
 
-        self.zlib.z_close.restype = c_int
-        self.zlib.z_close.argtypes = [c_void_p]
+        self.zlib.zn_close.restype = c_int
+        self.zlib.zn_close.argtypes = [c_void_p]
 
-        self.zlib.intersect.restype = c_int
-        self.zlib.intersect.argtypes = [c_char_p, c_char_p]
+        self.zlib.zn_rname_intersect.restype = c_int
+        self.zlib.zn_rname_intersect.argtypes = [c_char_p, c_char_p]
 
-        loc = z_to_canonical_locator(locator)
+        loc = zn_to_canonical_locator(locator)
 
-        r = self.zlib.z_open(loc, 0, dict_to_propsvec(properties))
+        r = self.zlib.zn_open(loc, 0, dict_to_propsvec(properties))
         if r.tag == Z_OK_TAG:
-            self.zenoh = r.value.zenoh
+            self.session = r.value.session
             self.connected = True
         else:
             raise Exception('Unable to open zenoh session (error code: {}).'
                             .format(r.value.error))
 
-        self.zlib.z_start_recv_loop(self.zenoh)
+        self.zlib.zn_start_recv_loop(self.session)
         while not self.running:
             time.sleep(0.01)
 
@@ -250,11 +251,11 @@ class Session(object):
         :returns: a {int: bytes} dictionary of properties.
 
         """
-        return propsvec_to_dict(self.zlib.z_info(self.zenoh))
+        return propsvec_to_dict(self.zlib.zn_info(self.session))
 
     @property
     def running(self):
-        return (self.zlib.z_running(self.zenoh) != 0)
+        return (self.zlib.zn_running(self.session) != 0)
 
     def declare_publisher(self, res_name):
         """
@@ -264,7 +265,7 @@ class Session(object):
         :returns: a zenoh publisher.
 
         """
-        r = self.zlib.z_declare_publisher(self.zenoh, res_name.encode())
+        r = self.zlib.zn_declare_publisher(self.session, res_name.encode())
         if r.tag == 0:
             return r.value.pub
         else:
@@ -285,11 +286,11 @@ class Session(object):
         global subscriberCallbackMap
         h = hash(callback)
         k = POINTER(c_int64)(c_int64(h))
-        r = self.zlib.z_declare_subscriber(self.zenoh,
-                                           selector.encode(),
-                                           byref(sub_mode.z_sm),
-                                           z_subscriber_trampoline_callback,
-                                           k)
+        r = self.zlib.zn_declare_subscriber(self.session,
+                                            selector.encode(),
+                                            byref(sub_mode.zn_sm),
+                                            zn_subscriber_trampoline_callback,
+                                            k)
         subscriberCallbackMap[h] = (k, callback)
         if r.tag == 0:
             return r.value.sub
@@ -318,11 +319,11 @@ class Session(object):
         k = POINTER(c_int64)(c_int64(h))
         subscriberCallbackMap[h] = (k, subscriber_callback)
         queryHandlerMap[h] = (k, query_handler)
-        r = self.zlib.z_declare_storage(
-                self.zenoh,
+        r = self.zlib.zn_declare_storage(
+                self.session,
                 selector.encode(),
-                z_subscriber_trampoline_callback,
-                z_query_handler_trampoline,
+                zn_subscriber_trampoline_callback,
+                zn_query_handler_trampoline,
                 k)
         if r.tag == 0:
             return r.value.sto
@@ -349,10 +350,10 @@ class Session(object):
         h = hash(query_handler)
         k = POINTER(c_int64)(c_int64(h))
         queryHandlerMap[h] = (k, query_handler)
-        r = self.zlib.z_declare_eval(
-                self.zenoh,
+        r = self.zlib.zn_declare_eval(
+                self.session,
                 selector.encode(),
-                z_query_handler_trampoline,
+                zn_query_handler_trampoline,
                 k)
         if r.tag == 0:
             return r.value.eval
@@ -371,9 +372,9 @@ class Session(object):
         :returns: 0 if the publication is successful.
 
         """
-        self.zlib.z_stream_compact_data(pub, data, len(data))
+        self.zlib.zn_stream_compact_data(pub, data, len(data))
 
-    def stream_data(self, pub, data, encoding=0, kind=Z_PUT):
+    def stream_data(self, pub, data, encoding=0, kind=ZN_PUT):
         """
         Send data in a *stream_data* message for the resource published by
         publisher **pub**.
@@ -387,9 +388,9 @@ class Session(object):
         :returns: 0 if the publication is successful.
 
         """
-        self.zlib.z_stream_data_wo(pub, data, len(data), encoding, kind)
+        self.zlib.zn_stream_data_wo(pub, data, len(data), encoding, kind)
 
-    def write_data(self, resource, data, encoding=0, kind=Z_PUT):
+    def write_data(self, resource, data, encoding=0, kind=ZN_PUT):
         """
         Send data in a *write_data* message for the resource **resource**.
 
@@ -401,28 +402,28 @@ class Session(object):
             data that represents the kind of publication.
         :returns: 0 if the publication is successful.
         """
-        self.zlib.z_write_data_wo(self.zenoh,
-                                  resource.encode(),
-                                  data,
-                                  len(data),
-                                  encoding,
-                                  kind)
+        self.zlib.zn_write_data_wo(self.session,
+                                   resource.encode(),
+                                   data,
+                                   len(data),
+                                   encoding,
+                                   kind)
 
     def pull(self, sub):
         """
-        Pull data for the `Z_PULL_MODE` or `Z_PERIODIC_PULL_MODE` subscribtion
-        **sub** from the nearest infrastruture component. The pulled data will
-        be provided by calling the **data_handler** function provided to the
-        **declare_subscriber** function.
+        Pull data for the `ZN_PULL_MODE` or `ZN_PERIODIC_PULL_MODE`
+        subscribtion **sub** from the nearest infrastruture component.
+        The pulled data will be provided by calling the **data_handler**
+        function provided to the **declare_subscriber** function.
 
         :param sub: the subscribtion to pull from.
         :returns: 0 if pull is successful.
         """
-        self.zlib.z_pull(sub)
+        self.zlib.zn_pull(sub)
 
     def query(self, selector, predicate, callback,
-              dest_storages=QueryDest(QueryDest.Z_BEST_MATCH),
-              dest_evals=QueryDest(QueryDest.Z_BEST_MATCH)):
+              dest_storages=QueryDest(QueryDest.ZN_BEST_MATCH),
+              dest_evals=QueryDest(QueryDest.ZN_BEST_MATCH)):
         """
         Query data matching selection **selector**.
 
@@ -442,13 +443,13 @@ class Session(object):
         h = hash(callback)
         k = POINTER(c_int64)(c_int64(h))
         replyCallbackMap[h] = (k, callback)
-        r = self.zlib.z_query_wo(self.zenoh,
-                                 selector.encode(),
-                                 predicate.encode(),
-                                 z_reply_trampoline_callback,
-                                 k,
-                                 dest_storages.z_qd,
-                                 dest_evals.z_qd)
+        r = self.zlib.zn_query_wo(self.session,
+                                  selector.encode(),
+                                  predicate.encode(),
+                                  zn_reply_trampoline_callback,
+                                  k,
+                                  dest_storages.zn_qd,
+                                  dest_evals.zn_qd)
         if r != 0:
             del replyCallbackMap[h]
             raise Exception('Unable to create query')
@@ -461,7 +462,7 @@ class Session(object):
         :returns: 0 when successful.
 
         """
-        self.zlib.z_undeclare_publisher(pub)
+        self.zlib.zn_undeclare_publisher(pub)
 
     def undeclare_subscriber(self, sub):
         """
@@ -471,7 +472,7 @@ class Session(object):
         :returns: 0 when successful.
 
         """
-        self.zlib.z_undeclare_subscriber(sub)
+        self.zlib.zn_undeclare_subscriber(sub)
 
     def undeclare_storage(self, sto):
         """
@@ -481,7 +482,7 @@ class Session(object):
         :returns: 0 when successful.
 
         """
-        self.zlib.z_undeclare_storage(sto)
+        self.zlib.zn_undeclare_storage(sto)
 
     def undeclare_eval(self, eval):
         """
@@ -491,11 +492,11 @@ class Session(object):
         :returns: 0 when successful.
 
         """
-        self.zlib.z_undeclare_eval(eval)
+        self.zlib.zn_undeclare_eval(eval)
 
     def close(self):
         """
             Close the zenoh session.
         """
-        self.zlib.z_close(self.zenoh)
-        self.zlib.z_stop_recv_loop(self.zenoh)
+        self.zlib.zn_close(self.session)
+        self.zlib.zn_stop_recv_loop(self.session)

@@ -53,9 +53,9 @@ class Workspace(object):
 
         self.rt.write_data(
             self.__to_absolute(path),
-            value.as_z_payload(),
+            value.as_zn_payload(),
             Encoding.to_z_encoding(value.get_encoding()),
-            zenoh.net.Z_PUT)
+            zenoh.net.ZN_PUT)
         return True
 
     def update(self, path, value):
@@ -109,11 +109,11 @@ class Workspace(object):
             callback)
         resultsMap = {}
         reply = q.get()
-        while(reply.kind != zenoh.net.Z_REPLY_FINAL):
-            if(reply.kind == zenoh.net.Z_STORAGE_DATA
-               or reply.kind == zenoh.net.Z_EVAL_DATA):
+        while(reply.kind != zenoh.net.ZN_REPLY_FINAL):
+            if(reply.kind == zenoh.net.ZN_STORAGE_DATA
+               or reply.kind == zenoh.net.ZN_EVAL_DATA):
                 entry = Entry(reply.rname,
-                              Value.from_z_resource(reply.data, reply.info),
+                              Value.from_zn_resource(reply.data, reply.info),
                               reply.info.tstamp)
                 if reply.rname not in resultsMap:
                     resultsMap[reply.rname] = set()
@@ -148,8 +148,8 @@ class Workspace(object):
         self.rt.write_data(
             self.__to_absolute(path),
             "".encode(),
-            Encoding.Z_RAW_ENC,
-            zenoh.net.Z_REMOVE)
+            Encoding.ZN_RAW_ENC,
+            zenoh.net.ZN_REMOVE)
         return True
 
     def subscribe(self, selector, listener):
@@ -172,13 +172,13 @@ class Workspace(object):
                         rname,
                         info.kind,
                         info.tstamp.time if info.tstamp is not None else None,
-                        Value.from_z_resource(data, info))])
+                        Value.from_zn_resource(data, info))])
                 else:
                     self.executor.submit(listener, [Change(
                         rname,
                         info.kind,
                         info.tstamp.time if info.tstamp is not None else None,
-                        Value.from_z_resource(data, info))])
+                        Value.from_zn_resource(data, info))])
             return self.rt.declare_subscriber(
                 selector,
                 zenoh.net.SubscriberMode.push(),
@@ -214,16 +214,18 @@ class Workspace(object):
 
         '''
 
+        path = self.__to_absolute(path)
+
         def query_handler(path_selector, content_selector, send_replies):
             def query_handler_p(path_selector, content_selector, send_replies):
                 args = Selector.dict_from_properties(
                     Selector("{}?{}".format(path_selector, content_selector)))
                 value = callback(path_selector, args)
-                info = z_data_info_t()
+                info = zn_data_info_t()
                 info.flags = 0x60
                 info.encoding = Encoding.to_z_encoding(value.get_encoding())
-                info.kind = Z_PUT
-                send_replies([(path_selector, (value.as_z_payload(), info))])
+                info.kind = ZN_PUT
+                send_replies([(path, (value.as_zn_payload(), info))])
             if self.executor is None:
                 query_handler_p(path_selector,
                                 content_selector,
@@ -234,7 +236,6 @@ class Workspace(object):
                                      content_selector,
                                      send_replies)
 
-        path = self.__to_absolute(path)
         zeval = self.rt.declare_eval(path,
                                      query_handler)
 

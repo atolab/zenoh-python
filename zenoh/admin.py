@@ -27,7 +27,7 @@ class Admin(object):
     def __init__(self, ws):
         self.ws = ws
         self.local = ''.join('{:02x}'.format(x) for x in
-                             ws.rt.info()[zenoh.net.Z_INFO_PEER_PID_KEY])
+                             ws.rt.info()[zenoh.net.ZN_INFO_PEER_PID_KEY])
 
     def add_backend(self, beid, properties, zid=None):
         '''

@@ -15,7 +15,7 @@
 from zenoh.workspace import Workspace
 from zenoh.admin import *
 import threading
-from zenoh.net import Session, Z_INFO_PEER_PID_KEY
+from zenoh.net import Session, ZN_INFO_PEER_PID_KEY
 
 
 class Zenoh(object):
@@ -47,8 +47,8 @@ class Zenoh(object):
 
         '''
         zprops = {} if properties is None else {
-            zenoh.net.Z_USER_KEY if k == "user" else
-            zenoh.net.Z_PASSWORD_KEY: val
+            zenoh.net.ZN_USER_KEY if k == "user" else
+            zenoh.net.ZN_PASSWORD_KEY: val
             for k, val in properties.items()
             if k == "user" or key == "password"}
 
@@ -93,4 +93,4 @@ class Zenoh(object):
             '/{}/{}'.format(
                 Admin.PREFIX,
                 ''.join('{:02x}'.format(x) for x in
-                        self.rt.info()[Z_INFO_PEER_PID_KEY]))))
+                        self.rt.info()[ZN_INFO_PEER_PID_KEY]))))

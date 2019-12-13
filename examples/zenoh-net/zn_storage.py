@@ -1,6 +1,6 @@
 import sys
 import time
-from zenoh.net import Session, rname_intersect
+from zenoh.net import Session, zn_rname_intersect
 
 store = {}
 
@@ -16,7 +16,7 @@ def query_handler(path_selector, content_selector, send_replies):
           .format(path_selector, content_selector))
     replies = []
     for k, v in store.items():
-        if rname_intersect(path_selector, k):
+        if zn_rname_intersect(path_selector, k):
             replies.append((k, v))
     send_replies(replies)
 

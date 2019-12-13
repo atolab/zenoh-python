@@ -21,9 +21,9 @@ from zenoh.encoding import Encoding
 
 
 class ChangeKind(Enum):
-    PUT = zenoh.net.Z_PUT
-    UPDATE = zenoh.net.Z_UPDATE
-    REMOVE = zenoh.net.Z_REMOVE
+    PUT = zenoh.net.ZN_PUT
+    UPDATE = zenoh.net.ZN_UPDATE
+    REMOVE = zenoh.net.ZN_REMOVE
 
 
 class Value(object):
@@ -45,7 +45,7 @@ class Value(object):
             self.value = value
         self.raw_format = raw_format
 
-    def as_z_payload(self):
+    def as_zn_payload(self):
         if self.encoding == Encoding.RAW:
             return bytes(self.value)
         if self.encoding == Encoding.PROPERTY:
@@ -73,7 +73,7 @@ class Value(object):
         return self.__str__()
 
     @staticmethod
-    def from_z_resource(buf, info):
+    def from_zn_resource(buf, info):
         encoding = Encoding.from_z_encoding(info.encoding)
         data = None
         if(encoding == Encoding.RAW):
@@ -85,9 +85,9 @@ class Value(object):
 
 class Change(object):
     kind_map = {
-            zenoh.net.Z_PUT: ChangeKind.PUT,
-            zenoh.net.Z_UPDATE: ChangeKind.UPDATE,
-            zenoh.net.Z_REMOVE: ChangeKind.REMOVE
+            zenoh.net.ZN_PUT: ChangeKind.PUT,
+            zenoh.net.ZN_UPDATE: ChangeKind.UPDATE,
+            zenoh.net.ZN_REMOVE: ChangeKind.REMOVE
     }
 
     def __init__(self, path, kind, time, value=None):

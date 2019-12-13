@@ -60,11 +60,11 @@ def z2_eval1_handler(path_selector, content_selector, send_replies):
 
 
 def reply_handler(reply):
-    if reply.kind == zenoh.net.Z_STORAGE_DATA:
+    if reply.kind == zenoh.net.ZN_STORAGE_DATA:
         storage_replies.append((reply.rname, reply.data))
-    if reply.kind == zenoh.net.Z_EVAL_DATA:
+    if reply.kind == zenoh.net.ZN_EVAL_DATA:
         eval_replies.append((reply.rname, reply.data))
-    elif reply.kind == zenoh.net.Z_REPLY_FINAL:
+    elif reply.kind == zenoh.net.ZN_REPLY_FINAL:
         replies_mvar.put((storage_replies, eval_replies))
 
 
@@ -75,7 +75,7 @@ class ClientTest(unittest.TestCase):
         locator = "tcp/127.0.0.1:7447"
 
         z1 = Session.open(locator)
-        z1_peer = z1.info()[zenoh.net.Z_INFO_PEER_KEY].decode().rstrip('\0')
+        z1_peer = z1.info()[zenoh.net.ZN_INFO_PEER_KEY].decode().rstrip('\0')
         self.assertEqual(locator, z1_peer)
         z1_sub1 = z1.declare_subscriber("/test/python/client/**",
                                         SubscriberMode.push(),
@@ -88,7 +88,7 @@ class ClientTest(unittest.TestCase):
         z1_pub1 = z1.declare_publisher("/test/python/client/z1_pub1")
 
         z2 = Session.open(locator)
-        z2_peer = z2.info()[zenoh.net.Z_INFO_PEER_KEY].decode().rstrip('\0')
+        z2_peer = z2.info()[zenoh.net.ZN_INFO_PEER_KEY].decode().rstrip('\0')
         self.assertEqual(locator, z2_peer)
         z2_sub1 = z2.declare_subscriber("/test/python/client/**",
                                         SubscriberMode.push(),
@@ -101,7 +101,7 @@ class ClientTest(unittest.TestCase):
         z2_pub1 = z2.declare_publisher("/test/python/client/z2_pub1")
 
         z3 = Session.open(locator)
-        z3_peer = z3.info()[zenoh.net.Z_INFO_PEER_KEY].decode().rstrip('\0')
+        z3_peer = z3.info()[zenoh.net.ZN_INFO_PEER_KEY].decode().rstrip('\0')
         self.assertEqual(locator, z3_peer)
         z3_sub1 = z3.declare_subscriber("/test/python/client/**",
                                         SubscriberMode.pull(),
@@ -138,8 +138,8 @@ class ClientTest(unittest.TestCase):
 
         z1.query("/test/python/client/**", "", reply_handler,
                  dest_storages=zenoh.net.QueryDest(
-                     zenoh.net.QueryDest.Z_BEST_MATCH),
-                 dest_evals=zenoh.net.QueryDest(zenoh.net.QueryDest.Z_NONE))
+                     zenoh.net.QueryDest.ZN_BEST_MATCH),
+                 dest_evals=zenoh.net.QueryDest(zenoh.net.QueryDest.ZN_NONE))
         replies_mvar.get()
         self.assertEqual(2, len(storage_replies))
         self.assertEqual(sent_res, storage_replies[0])
@@ -152,8 +152,8 @@ class ClientTest(unittest.TestCase):
         eval_replies = []
 
         z1.query("/test/python/client/**", "", reply_handler,
-                 dest_storages=QueryDest(QueryDest.Z_NONE),
-                 dest_evals=QueryDest(QueryDest.Z_BEST_MATCH))
+                 dest_storages=QueryDest(QueryDest.ZN_NONE),
+                 dest_evals=QueryDest(QueryDest.ZN_BEST_MATCH))
         replies_mvar.get()
         # self.assertEqual(0, len(storage_replies))
         # This may not be true for now as :
@@ -173,8 +173,8 @@ class ClientTest(unittest.TestCase):
         eval_replies = []
 
         z2.query("/test/python/client/**", "", reply_handler,
-                 dest_storages=QueryDest(QueryDest.Z_BEST_MATCH),
-                 dest_evals=QueryDest(QueryDest.Z_NONE))
+                 dest_storages=QueryDest(QueryDest.ZN_BEST_MATCH),
+                 dest_evals=QueryDest(QueryDest.ZN_NONE))
         replies_mvar.get()
         self.assertEqual(2, len(storage_replies))
         self.assertEqual(sent_res, storage_replies[0])
@@ -187,8 +187,8 @@ class ClientTest(unittest.TestCase):
         eval_replies = []
 
         z2.query("/test/python/client/**", "", reply_handler,
-                 dest_storages=QueryDest(QueryDest.Z_NONE),
-                 dest_evals=QueryDest(QueryDest.Z_BEST_MATCH))
+                 dest_storages=QueryDest(QueryDest.ZN_NONE),
+                 dest_evals=QueryDest(QueryDest.ZN_BEST_MATCH))
         replies_mvar.get()
         # self.assertEqual(0, len(storage_replies))
         # This may not be true for now as :

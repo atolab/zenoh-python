@@ -7,30 +7,30 @@ import traceback
 from ctypes import *
 from functools import partial
 
-Z_INT_RES_ID = 0
-Z_STR_RES_ID = 1
+ZN_INT_RES_KEY = 0
+ZN_STR_RES_KEY = 1
 
 
-Z_PUT = 0x00
-Z_UPDATE = 0x01
-Z_REMOVE = 0x02
+ZN_PUT = 0x00
+ZN_UPDATE = 0x01
+ZN_REMOVE = 0x02
 
-Z_STORAGE_DATA = 0x00
-Z_STORAGE_FINAL = 0x01
-Z_EVAL_DATA = 0x02
-Z_EVAL_FINAL = 0x03
-Z_REPLY_FINAL = 0x04
+ZN_STORAGE_DATA = 0x00
+ZN_STORAGE_FINAL = 0x01
+ZN_EVAL_DATA = 0x02
+ZN_EVAL_FINAL = 0x03
+ZN_REPLY_FINAL = 0x04
 
 Z_OK_TAG = 0
 Z_ERROR_TAG = 1
 
-Z_SRC_ID = 0x01
-Z_SRC_SN = 0x02
-Z_BRK_ID = 0x04
-Z_BRK_SN = 0x08
-Z_T_STAMP = 0x10
-Z_KIND = 0x20
-Z_ENCODING = 0x40
+ZN_SRC_ID = 0x01
+ZN_SRC_SN = 0x02
+ZN_BRK_ID = 0x04
+ZN_BRK_SN = 0x08
+ZN_T_STAMP = 0x10
+ZN_KIND = 0x20
+ZN_ENCODING = 0x40
 
 subscriberCallbackMap = {}
 replyCallbackMap = {}
@@ -62,52 +62,52 @@ def get_user_lib_path():
 
 system = platform.system()
 if system in ['windows', 'Windows', 'win32']:
-    zenoh_lib = 'zenohc' + get_lib_ext()
-    zenoh_lib_path = get_user_lib_path() + os.sep + zenoh_lib
+    zenohc_lib = 'zenohc' + get_lib_ext()
+    zenohc_lib_path = get_user_lib_path() + os.sep + zenohc_lib
 else:
-    zenoh_lib = 'libzenohc' + get_lib_ext()
-    zenoh_lib_path = get_user_lib_path() + os.sep + zenoh_lib
+    zenohc_lib = 'libzenohc' + get_lib_ext()
+    zenohc_lib_path = get_user_lib_path() + os.sep + zenohc_lib
 
 
 # zenoh-c result types
-class z_zenoh_p_result_union_t(Union):
-    _fields_ = [('zenoh', c_void_p), ('error', c_int)]
+class zn_session_p_result_union_t(Union):
+    _fields_ = [('session', c_void_p), ('error', c_int)]
 
 
-class z_zenoh_p_result_t(Structure):
-    _fields_ = [('tag', c_int), ('value', z_zenoh_p_result_union_t)]
+class zn_session_p_result_t(Structure):
+    _fields_ = [('tag', c_int), ('value', zn_session_p_result_union_t)]
 
 
-class z_pub_p_result_union_t(Union):
+class zn_pub_p_result_union_t(Union):
     _fields_ = [('pub', c_void_p), ('error', c_int)]
 
 
-class z_pub_p_result_t(Structure):
-    _fields_ = [('tag', c_int), ('value', z_pub_p_result_union_t)]
+class zn_pub_p_result_t(Structure):
+    _fields_ = [('tag', c_int), ('value', zn_pub_p_result_union_t)]
 
 
-class z_sub_p_result_union_t(Union):
+class zn_sub_p_result_union_t(Union):
     _fields_ = [('sub', c_void_p), ('error', c_int)]
 
 
-class z_sub_p_result_t(Structure):
-    _fields_ = [('tag', c_int), ('value', z_sub_p_result_union_t)]
+class zn_sub_p_result_t(Structure):
+    _fields_ = [('tag', c_int), ('value', zn_sub_p_result_union_t)]
 
 
-class z_sto_p_result_union_t(Union):
+class zn_sto_p_result_union_t(Union):
     _fields_ = [('sto', c_void_p), ('error', c_int)]
 
 
-class z_sto_p_result_t(Structure):
-    _fields_ = [('tag', c_int), ('value', z_sto_p_result_union_t)]
+class zn_sto_p_result_t(Structure):
+    _fields_ = [('tag', c_int), ('value', zn_sto_p_result_union_t)]
 
 
-class z_eval_p_result_union_t(Union):
+class zn_eval_p_result_union_t(Union):
     _fields_ = [('eval', c_void_p), ('error', c_int)]
 
 
-class z_eval_p_result_t(Structure):
-    _fields_ = [('tag', c_int), ('value', z_eval_p_result_union_t)]
+class zn_eval_p_result_t(Structure):
+    _fields_ = [('tag', c_int), ('value', zn_eval_p_result_union_t)]
 
 
 class z_vec_t(Structure):
@@ -115,16 +115,16 @@ class z_vec_t(Structure):
 
 
 # Resource Id
-class z_res_id_t(Union):
-    _fields_ = [('rid', c_int), ('rname', c_char_p)]
+class zn_res_key_t(Union):
+    _fields_ = [('rkey', c_int), ('rname', c_char_p)]
 
 
-class z_resource_id_t(Structure):
-    _fields_ = [('kind', c_int), ('id', z_res_id_t)]
+class zn_resource_key_t(Structure):
+    _fields_ = [('kind', c_int), ('key', zn_res_key_t)]
 
 
 # TimeStamp
-class z_timestamp_t(Structure):
+class zn_timestamp_t(Structure):
     _fields_ = [('clock_id', c_uint8 * 16),
                 ('time', c_size_t)]
 
@@ -187,9 +187,9 @@ class z_timestamp_t(Structure):
 
 
 # Data Info
-class z_data_info_t(Structure):
+class zn_data_info_t(Structure):
     _fields_ = [('flags', c_uint),
-                ('tstamp', z_timestamp_t),
+                ('tstamp', zn_timestamp_t),
                 ('encoding', c_uint8),
                 ('kind', c_ushort)]
 
@@ -213,53 +213,53 @@ class DataInfo():
         self.encoding = encoding
 
     @staticmethod
-    def from_z_data_info(z_info):
+    def from_zn_data_info(zn_info):
         return DataInfo(
-            kind=z_info.kind if z_info.flags & Z_KIND else None,
-            encoding=z_info.encoding if z_info.flags & Z_ENCODING else None,
-            tstamp=z_info.tstamp if z_info.flags & Z_T_STAMP else None
+            kind=zn_info.kind if zn_info.flags & ZN_KIND else None,
+            encoding=zn_info.encoding if zn_info.flags & ZN_ENCODING else None,
+            tstamp=zn_info.tstamp if zn_info.flags & ZN_T_STAMP else None
         )
 
 
 # Query destination
-class z_query_dest_t(Structure):
+class zn_query_dest_t(Structure):
     _fields_ = [('kind', c_uint8), ('nb', c_uint8)]
 
 
 # Temporal properties
-class z_temporal_property_t(Structure):
+class zn_temporal_property_t(Structure):
     _fields_ = [('origin', c_int), ('period', c_int), ('duration', c_int)]
 
 
-class z_sub_mode_t(Structure):
-    _fields_ = [('kind', c_uint8), ('tprop', z_temporal_property_t)]
+class zn_sub_mode_t(Structure):
+    _fields_ = [('kind', c_uint8), ('tprop', zn_temporal_property_t)]
 
 
 # properties
-class z_array_uint8_t(Structure):
+class z_uint8_array_t(Structure):
     _fields_ = [
         ('length', c_uint),
         ('elem', POINTER(c_char))]
 
 
-class z_property_t(Structure):
-    _fields_ = [('id', c_size_t), ('value', z_array_uint8_t)]
+class zn_property_t(Structure):
+    _fields_ = [('id', c_size_t), ('value', z_uint8_array_t)]
 
 
 def dict_to_propsvec(props):
     length = len(props)
-    elems = [POINTER(z_property_t)(z_property_t(
-                key, z_array_uint8_t(
+    elems = [POINTER(zn_property_t)(zn_property_t(
+                key, z_uint8_array_t(
                         len(val),
                         ctypes.create_string_buffer(val, len(val)))))
              for key, val in props.items()]
     return POINTER(z_vec_t)(z_vec_t(
         length, length,
-        cast(((POINTER(z_property_t) * length)(*elems)), c_void_p)))
+        cast(((POINTER(zn_property_t) * length)(*elems)), c_void_p)))
 
 
 def propsvec_to_dict(vec):
-    vectype = POINTER((POINTER(z_property_t) * vec.length))
+    vectype = POINTER((POINTER(zn_property_t) * vec.length))
     props = [prop[0] for prop in cast(vec.elem, vectype)[0]]
     return {prop.id: prop.value.elem[:prop.value.length] for prop in props}
 
@@ -268,7 +268,7 @@ CHAR_PTR = POINTER(c_char)
 
 
 # zenoh-c callbacks
-class z_reply_value_t(Structure):
+class zn_reply_value_t(Structure):
     _fields_ = [
         ('kind', c_uint8),
         ('srcid', CHAR_PTR),
@@ -277,7 +277,7 @@ class z_reply_value_t(Structure):
         ('rname', c_char_p),
         ('data', CHAR_PTR),
         ('data_length', c_size_t),
-        ('info', z_data_info_t)]
+        ('info', zn_data_info_t)]
 
 
 class QueryReply(object):
@@ -287,32 +287,32 @@ class QueryReply(object):
     kind
         One of the following:
 
-        | ``Z_STORAGE_DATA`` the reply contains some data from a storage.
-        | ``Z_STORAGE_FINAL`` the reply indicates that no more data is
+        | ``ZN_STORAGE_DATA`` the reply contains some data from a storage.
+        | ``ZN_STORAGE_FINAL`` the reply indicates that no more data is
             expected from the specified storage.
-        | ``Z_EVAL_DATA`` the reply contains some data from an eval.
-        | ``Z_EVAL_FINAL`` the reply indicates that no more data is expected
+        | ``ZN_EVAL_DATA`` the reply contains some data from an eval.
+        | ``ZN_EVAL_FINAL`` the reply indicates that no more data is expected
             from the specified eval.
-        | ``Z_REPLY_FINAL`` the reply indicates that no more replies are
+        | ``ZN_REPLY_FINAL`` the reply indicates that no more replies are
             expected for the query.
 
     source_id
         The unique identifier of the storage or eval that sent the reply
-        when `kind` equals ``Z_STORAGE_DATA``, ``Z_STORAGE_FINAL``,
-        ``Z_EVAL_DATA`` or ``Z_EVAL_FINAL``.
+        when `kind` equals ``ZN_STORAGE_DATA``, ``ZN_STORAGE_FINAL``,
+        ``ZN_EVAL_DATA`` or ``ZN_EVAL_FINAL``.
     seq_num
         The sequence number of the reply from the identified storage or
-        eval when `kind` equals ``Z_STORAGE_DATA``, ``Z_STORAGE_FINAL``,
-        ``Z_EVAL_DATA`` or ``Z_EVAL_FINAL``.
+        eval when `kind` equals ``ZN_STORAGE_DATA``, ``ZN_STORAGE_FINAL``,
+        ``ZN_EVAL_DATA`` or ``ZN_EVAL_FINAL``.
     rname
         The resource name of the received data when `kind` equals
-        ``Z_STORAGE_DATA`` or ``Z_EVAL_DATA``.
+        ``ZN_STORAGE_DATA`` or ``ZN_EVAL_DATA``.
     data
-        The received data when `kind` equals ``Z_STORAGE_DATA`` or
-        ``Z_EVAL_DATA``.
+        The received data when `kind` equals ``ZN_STORAGE_DATA`` or
+        ``ZN_EVAL_DATA``.
     info
         A :class:`DataInfo` object holding meta information about the received
-        data when `kind` equals ``Z_STORAGE_DATA`` or ``Z_EVAL_DATA``.
+        data when `kind` equals ``ZN_STORAGE_DATA`` or ``ZN_EVAL_DATA``.
 
     """
 
@@ -324,25 +324,25 @@ class QueryReply(object):
         self.data = None
         self.info = None
 
-        if(self.kind == Z_STORAGE_DATA
-           or self.kind == Z_EVAL_DATA):
+        if(self.kind == ZN_STORAGE_DATA
+           or self.kind == ZN_EVAL_DATA):
             self.source_id = zrv.srcid[:zrv.srcid_length]
             self.seq_num = zrv.rsn
             self.rname = zrv.rname.decode()
             self.data = zrv.data[:zrv.data_length]
-            self.info = z_data_info_t()
+            self.info = zn_data_info_t()
             self.info.flags = zrv.info.flags
             self.info.tstamp.clock_id = zrv.info.tstamp.clock_id
             self.info.tstamp.time = zrv.info.tstamp.time
             self.info.encoding = zrv.info.encoding
             self.info.kind = zrv.info.kind
 
-        elif(self.kind == Z_STORAGE_FINAL
-             or self.kind == Z_EVAL_FINAL):
+        elif(self.kind == ZN_STORAGE_FINAL
+             or self.kind == ZN_EVAL_FINAL):
             self.source_id = zrv.srcid[:zrv.srcid_length]
 
 
-class z_resource_t(Structure):
+class zn_resource_t(Structure):
     _fields_ = [
         ('rname', c_char_p),
         ('data', c_char_p),
@@ -352,25 +352,25 @@ class z_resource_t(Structure):
     ]
 
 
-class z_array_p_resource_t(Structure):
+class zn_resource_p_array_t(Structure):
     _fields_ = [
         ('length', c_uint),
-        ('elem', POINTER(POINTER(z_resource_t)))
+        ('elem', POINTER(POINTER(zn_resource_t)))
     ]
 
 
 ZENOH_ON_DISCONNECT_CALLBACK_PROTO = CFUNCTYPE(None, c_void_p)
 ZENOH_SUBSCRIBER_CALLBACK_PROTO = CFUNCTYPE(None,
-                                            POINTER(z_resource_id_t),
+                                            POINTER(zn_resource_key_t),
                                             CHAR_PTR, c_uint,
-                                            POINTER(z_data_info_t),
+                                            POINTER(zn_data_info_t),
                                             POINTER(c_int64))
 ZENOH_REPLY_CALLBACK_PROTO = CFUNCTYPE(None,
-                                       POINTER(z_reply_value_t),
+                                       POINTER(zn_reply_value_t),
                                        POINTER(c_int64))
 ZENOH_SEND_REPLIES_PROTO = CFUNCTYPE(None,
                                      POINTER(c_int64),
-                                     z_array_p_resource_t)
+                                     zn_resource_p_array_t)
 ZENOH_QUERY_HANDLER_PROTO = CFUNCTYPE(None,
                                       c_char_p,
                                       c_char_p,
@@ -380,20 +380,20 @@ ZENOH_QUERY_HANDLER_PROTO = CFUNCTYPE(None,
 
 
 @ZENOH_SUBSCRIBER_CALLBACK_PROTO
-def z_subscriber_trampoline_callback(rid, data, length, info, arg):
+def zn_subscriber_trampoline_callback(rkey, data, length, info, arg):
     global subscriberCallbackMap
     key = arg.contents.value
     _, callback = subscriberCallbackMap[key]
-    if rid.contents.kind == Z_STR_RES_ID:
-        py_info = DataInfo.from_z_data_info(info.contents)
-        callback(rid.contents.id.rname.decode(), data[:length], py_info)
+    if rkey.contents.kind == ZN_STR_RES_KEY:
+        py_info = DataInfo.from_zn_data_info(info.contents)
+        callback(rkey.contents.key.rname.decode(), data[:length], py_info)
     else:
-        print('WARNING: Received data for unknown  resource name, rid = {}'
-              .format(rid.id.rid))
+        print('WARNING: Received data for unknown  resource name, rkey = {}'
+              .format(rkey.key.rid))
 
 
 @ZENOH_REPLY_CALLBACK_PROTO
-def z_reply_trampoline_callback(reply_value, arg):
+def zn_reply_trampoline_callback(reply_value, arg):
     global replyCallbackMap
     key = arg.contents.value
     _, callback = replyCallbackMap[key]
@@ -402,14 +402,14 @@ def z_reply_trampoline_callback(reply_value, arg):
 
 
 def send_replies_fun(send_replies, query_handle, replies):
-    replies_array = z_array_p_resource_t()
+    replies_array = zn_resource_p_array_t()
     replies_array.length = len(replies)
-    rs = (POINTER(z_resource_t) * len(replies))()
-    replies_array.elem = cast(rs, POINTER(POINTER(z_resource_t)))
+    rs = (POINTER(zn_resource_t) * len(replies))()
+    replies_array.elem = cast(rs, POINTER(POINTER(zn_resource_t)))
     i = 0
     for k, v in replies:
         d, info = v
-        replies_array.elem[i].contents = z_resource_t()
+        replies_array.elem[i].contents = zn_resource_t()
         replies_array.elem[i].contents.rname = k.encode()
         replies_array.elem[i].contents.data = d
         replies_array.elem[i].contents.length = len(d)
@@ -431,11 +431,11 @@ def send_replies_fun(send_replies, query_handle, replies):
 
 
 @ZENOH_QUERY_HANDLER_PROTO
-def z_query_handler_trampoline(rname,
-                               predicate,
-                               send_replies,
-                               query_handle,
-                               arg):
+def zn_query_handler_trampoline(rname,
+                                predicate,
+                                send_replies,
+                                query_handle,
+                                arg):
     global queryHandlerMap
     key = arg.contents.value
     _, handler = queryHandlerMap[key]

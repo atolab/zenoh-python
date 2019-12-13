@@ -1,13 +1,13 @@
 import sys
 import time
-from zenoh.net import Session, DataInfo, Z_PUT
+from zenoh.net import Session, DataInfo, ZN_PUT
 
 
 def query_handler(path_selector, content_selector, send_replies):
     print(">> [Query handler] Handling '{}?{}'"
           .format(path_selector, content_selector))
     k, v = "/demo/example/zenoh-python-eval", "Eval from Python!".encode()
-    send_replies([(k, (v, DataInfo(kind=Z_PUT)))])
+    send_replies([(k, (v, DataInfo(kind=ZN_PUT)))])
 
 
 if __name__ == '__main__':

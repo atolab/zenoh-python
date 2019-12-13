@@ -20,12 +20,12 @@ from enum import Enum
 
 
 class Encoding(object):
-    Z_RAW_ENC = 0x00
-    Z_CUSTOM_ENC = 0x01
-    Z_STRING_ENC = 0x02
-    Z_PROPERTIES_ENC = 0x03
-    Z_JSON_ENC = 0x04
-    Z_SQL_ENC = 0x05
+    ZN_RAW_ENC = 0x00
+    ZN_CUSTOM_ENC = 0x01
+    ZN_STRING_ENC = 0x02
+    ZN_PROPERTIES_ENC = 0x03
+    ZN_JSON_ENC = 0x04
+    ZN_SQL_ENC = 0x05
 
     RAW = 0x01
     STRING = 0x02

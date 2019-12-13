@@ -5,7 +5,7 @@ import argparse
 
 locator = None
 if len(sys.argv) < 2:
-    print('USAGE:\n\tz_put_thr <payload-size> [<zenoh-locator>]\n\n')
+    print('USAGE:\n\tzn_put_thr <payload-size> [<zenoh-locator>]\n\n')
     sys.exit(-1)
 
 length = int(sys.argv[1])
