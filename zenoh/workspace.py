@@ -220,7 +220,7 @@ class Workspace(object):
             def query_handler_p(path_selector, content_selector, send_replies):
                 args = Selector.dict_from_properties(
                     Selector("{}?{}".format(path_selector, content_selector)))
-                value = callback(path_selector, args)
+                value = callback(path, args)
                 info = zn_data_info_t()
                 info.flags = 0x60
                 info.encoding = Encoding.to_z_encoding(value.get_encoding())
