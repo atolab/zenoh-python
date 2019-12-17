@@ -13,14 +13,13 @@
 # Contributors: Gabriele Baldoni, ADLINK Technology Inc. - Zenoh API
 
 import re
-from zenoh.exceptions import ValidationError
 
 
 class Path(object):
     def __init__(self, path):
         self.__path_regex = re.compile('^[^?#*]+$')
         if not self.is_valid(path):
-            raise ValidationError("{} is not a valid Path".format(path))
+            raise ValueError("Invalid Path: {}".format(path))
         self.path = path
 
     @staticmethod

@@ -22,7 +22,6 @@ from zenoh import Zenoh
 from zenoh import Selector
 from zenoh import Path
 from zenoh import Value, ChangeKind
-from zenoh.exceptions import ValidationError
 from zenoh import Encoding
 
 ZSERVER = '127.0.0.1'

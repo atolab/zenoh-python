@@ -14,7 +14,6 @@
 
 import unittest
 from zenoh import Path
-from zenoh.exceptions import *
 
 
 class PathTests(unittest.TestCase):
@@ -81,15 +80,15 @@ class PathTests(unittest.TestCase):
         self.assertEqual(len(s), len(p1))
 
     def test_path_check_ko_1(self):
-        self.assertRaises(ValidationError, Path, '//this/is/a/not/path')
+        self.assertRaises(ValueError, Path, '//this/is/a/not/path')
 
     def test_path_check_ko_2(self):
-        self.assertRaises(ValidationError, Path, '//this/is/a/not/path/**')
+        self.assertRaises(ValueError, Path, '//this/is/a/not/path/**')
 
     def test_path_check_ko_3(self):
-        self.assertRaises(ValidationError,
+        self.assertRaises(ValueError,
                           Path, '//this/is/a/not/path?with=query')
 
     def test_path_check_ko_4(self):
-        self.assertRaises(ValidationError,
+        self.assertRaises(ValueError,
                           Path, '//this/is/a/not/path#fragment')

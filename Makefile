@@ -28,7 +28,7 @@ dist:
 
 clean:
 	rm -rf ./build ./dist ./zenoh.egg-info .coverage;
-	rm -rf zenoh_api.log .tox zenoh.egg-info ./zenoh/__pycache__/ ./zenoh/tests/__pycache__/;
+	rm -rf zenoh_api.log .tox zenoh.egg-info ./zenoh/__pycache__/ ./zenoh/*/__pycache__/ ./zenoh/*/*/__pycache__/;
 
 test:
 	rm -rf ./tox

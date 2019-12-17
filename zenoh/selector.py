@@ -13,7 +13,6 @@
 # Contributors: Gabriele Baldoni, ADLINK Technology Inc. - Zenoh API
 
 import re
-from zenoh.exceptions import ValidationError
 from zenoh.path import Path
 
 
@@ -22,8 +21,8 @@ class Selector(object):
         self.__sel_regex = re.compile(
             '^([^?#]+)(\?([^\[()\]#]*)(\((.*)\))?)?(\#(.*))?$')
         if not self.is_valid(selector):
-            raise ValidationError(
-                "{} is not a valid Selector".format(selector))
+            raise ValueError(
+                "Invalid Selector: {}".format(selector))
         res = self.__sel_regex.match(selector)
         self.selector = selector
         self.path = res.group(1) or None

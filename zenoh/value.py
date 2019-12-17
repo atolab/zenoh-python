@@ -16,7 +16,7 @@ import re
 import json
 import zenoh.net
 from enum import Enum
-from zenoh.exceptions import ValidationError
+from zenoh.core import ZException
 from zenoh.encoding import Encoding
 
 
@@ -37,7 +37,7 @@ class Value(object):
         self.encoding = encoding
         if self.encoding == Encoding.JSON:
             if not (isinstance(value, dict) or isinstance(value, str)):
-                raise ValidationError("Value is not a valid JSON")
+                raise ZException("Value is not a valid JSON")
             self.value = json.dumps(value)
         elif self.encoding == Encoding.RAW and isinstance(value, str):
             self.value = value.encode()

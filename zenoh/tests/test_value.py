@@ -15,7 +15,7 @@
 import unittest
 from zenoh import Value, Change, ChangeKind
 from zenoh.encoding import *
-from zenoh.exceptions import ValidationError
+from zenoh.core import ZException
 
 
 class ValueTests(unittest.TestCase):
@@ -62,7 +62,7 @@ class ValueTests(unittest.TestCase):
 
     def test_not_valid_json(self):
         nvj = ['hello!']
-        self.assertRaises(ValidationError, Value, nvj, Encoding.JSON)
+        self.assertRaises(ZException, Value, nvj, Encoding.JSON)
 
     def test_equal(self):
         v1 = Value('test string value', encoding=Encoding.STRING)

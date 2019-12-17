@@ -4,8 +4,8 @@ from zenoh.net import Session, SubscriberMode
 
 
 def listener(rname, data, info):
-    print(">> [Subscription listener] Received ('{}': '{}')"
-          .format(rname, data.decode("utf-8")))
+    print(">> [Subscription listener] Received ('{}': '{}') at {}"
+          .format(rname, data.decode("utf-8"), info.tstamp))
 
 
 if __name__ == '__main__':

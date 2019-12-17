@@ -1,4 +1,6 @@
 from .binding import *
+import zenoh.core
+from zenoh.core import *
 import socket
 import time
 
@@ -107,8 +109,8 @@ def zn_to_canonical_locator(locator):
         if s == ':' and p != '':
             return ('tcp/' + socket.gethostbyname(h) + ':' + p).encode()
         else:
-            raise Exception('Invalid locator format {}, it should be '
-                            'tcp/<ip-addr|host-name>:port'.format(locator))
+            raise ZException('Invalid locator format {}, it should be '
+                             'tcp/<ip-addr|host-name>:port'.format(locator))
     elif b == '':
         h, s, p = locator.partition(':')
         if s == ':':
@@ -217,8 +219,7 @@ class Session(object):
             self.session = r.value.session
             self.connected = True
         else:
-            raise Exception('Unable to open zenoh session (error code: {}).'
-                            .format(r.value.error))
+            raise ZException('Unable to open zenoh session', r.value.error)
 
         self.zlib.zn_start_recv_loop(self.session)
         while not self.running:
@@ -269,7 +270,7 @@ class Session(object):
         if r.tag == 0:
             return r.value.pub
         else:
-            raise Exception('Unable to create publisher')
+            raise ZException('Unable to create publisher', r.value.error)
 
     def declare_subscriber(self, selector, sub_mode, callback):
         """
@@ -296,7 +297,7 @@ class Session(object):
             return r.value.sub
         else:
             del subscriberCallbackMap[h]
-            raise Exception('Unable to create subscriber')
+            raise ZException('Unable to create subscriber', r.value.error)
 
     def declare_storage(self, selector, subscriber_callback, query_handler):
         """
@@ -330,7 +331,7 @@ class Session(object):
         else:
             del subscriberCallbackMap[h]
             del replyCallbackMap[h]
-            raise Exception('Unable to create storage')
+            raise ZException('Unable to create storage', r.value.error)
 
     def declare_eval(self, selector, query_handler):
         """
@@ -359,7 +360,7 @@ class Session(object):
             return r.value.eval
         else:
             del replyCallbackMap[h]
-            raise Exception('Unable to create eval')
+            raise ZException('Unable to create eval', r.value.error)
 
     def stream_compact_data(self, pub, data):
         """
@@ -452,7 +453,7 @@ class Session(object):
                                   dest_evals.zn_qd)
         if r != 0:
             del replyCallbackMap[h]
-            raise Exception('Unable to create query')
+            raise ZException('Unable to create query', r)
 
     def undeclare_publisher(self, pub):
         """

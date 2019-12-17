@@ -15,7 +15,6 @@
 import unittest
 from zenoh import Selector
 from zenoh import Path
-from zenoh.exceptions import *
 
 
 class SelectorTests(unittest.TestCase):
@@ -105,5 +104,5 @@ class SelectorTests(unittest.TestCase):
         self.assertEqual(hash(s), hash(s1))
 
     def test_selector_check_ko_1(self):
-        self.assertRaises(ValidationError, Selector,
+        self.assertRaises(ValueError, Selector,
                           '//this/is/a/not/selector')
