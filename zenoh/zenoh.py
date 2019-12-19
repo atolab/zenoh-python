@@ -90,7 +90,6 @@ class Zenoh(object):
 
         '''
         return Admin(self.workspace(
-            '/{}/{}'.format(
-                Admin.PREFIX,
+            '/@/{}'.format(
                 ''.join('{:02x}'.format(x) for x in
                         self.rt.info()[ZN_INFO_PEER_PID_KEY]))))

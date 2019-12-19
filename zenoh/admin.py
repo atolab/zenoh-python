@@ -22,8 +22,6 @@ class Admin(object):
     The Administration helper class.
     '''
 
-    PREFIX = '@'
-
     def __init__(self, ws):
         self.ws = ws
         self.local = ''.join('{:02x}'.format(x) for x in
@@ -40,8 +38,8 @@ class Admin(object):
         '''
         if(zid is None):
             zid = self.local
-        path = '/{}/{}/plugins/yaks/backend/{}'.format(
-            Admin.PREFIX, zid, beid)
+        path = '/@/router/{}/plugin/storages/backend/{}'.format(
+            zid, beid)
         value = Value(properties, encoding=Encoding.PROPERTY)
         return self.ws.put(path, value)
 
@@ -54,8 +52,8 @@ class Admin(object):
         '''
         if(zid is None):
             zid = self.local
-        s = '/{}/{}/plugins/yaks/backend/*'.format(
-            Admin.PREFIX, zid)
+        s = '/@/router/{}/plugin/storages/backend/*'.format(
+            zid)
         entries = self.ws.get(s)
         return list(map(
             lambda e: (e.get_path().split('/')[-1],
@@ -71,8 +69,8 @@ class Admin(object):
         '''
         if(zid is None):
             zid = self.local
-        s = '/{}/{}/plugins/yaks/backend/{}'.format(
-            Admin.PREFIX, zid, beid)
+        s = '/@/router/{}/plugin/storages/backend/{}'.format(
+            zid, beid)
         entries = self.ws.get(s)
         if len(entries) > 0:
             return entries[0].get_value().value
@@ -88,8 +86,8 @@ class Admin(object):
         '''
         if(zid is None):
             zid = self.local
-        path = '/{}/{}/plugins/yaks/backend/{}'.format(
-            Admin.PREFIX, zid, beid)
+        path = '/@/router/{}/plugin/storages/backend/{}'.format(
+            zid, beid)
         return self.ws.remove(path)
 
     def add_storage(self, stid, properties, beid=None, zid=None):
@@ -108,8 +106,8 @@ class Admin(object):
             zid = self.local
         if not beid:
             beid = 'auto'
-        p = '/{}/{}/plugins/yaks/backend/{}/storage/{}'.format(
-            Admin.PREFIX, zid, beid, stid)
+        p = '/@/router/{}/plugin/storages/backend/{}/storage/{}'.format(
+            zid, beid, stid)
         v = Value(properties, encoding=Encoding.PROPERTY)
         return self.ws.put(p, v)
 
@@ -125,8 +123,8 @@ class Admin(object):
             zid = self.local
         if not beid:
             beid = '*'
-        s = '/{}/{}/plugins/yaks/backend/{}/storage/*'.format(
-            Admin.PREFIX, zid, beid)
+        s = '/@/router/{}/plugin/storages/backend/{}/storage/*'.format(
+            zid, beid)
         entries = self.ws.get(s)
         return list(map(
             lambda e: (e.get_path().split('/')[-1],
@@ -142,8 +140,8 @@ class Admin(object):
         '''
         if(zid is None):
             zid = self.local
-        s = '/{}/{}/plugins/yaks/backend/*/storage/{}'.format(
-            Admin.PREFIX, zid, stid)
+        s = '/@/router/{}/plugin/storages/backend/*/storage/{}'.format(
+            zid, stid)
         entries = self.ws.get(s)
         if len(entries) > 0:
             return entries[0].get_value().value
@@ -159,8 +157,8 @@ class Admin(object):
         '''
         if(zid is None):
             zid = self.local
-        s = '/{}/{}/plugins/yaks/backend/*/storage/{}'.format(
-            Admin.PREFIX, zid, stid)
+        s = '/@/router/{}/plugin/storages/backend/*/storage/{}'.format(
+            zid, stid)
         entries = self.ws.get(s)
         if len(entries) > 0:
             p = entries[0].get_path()
