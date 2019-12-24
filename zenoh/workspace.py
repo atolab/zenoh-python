@@ -17,7 +17,7 @@ from zenoh.encoding import Encoding, TranscodingFallback
 from zenoh.path import Path
 from zenoh.selector import Selector
 from zenoh.value import Value, Change
-from zenoh.entry import Entry
+from zenoh.data import Data
 import zenoh.net
 from zenoh.net import *
 
@@ -86,7 +86,7 @@ class Workspace(object):
         Get a selection of path/value from Zenoh.
 
         :param selector: the selector expressing the selection.
-        :returns: a list of entry.
+        :returns: a list of data.
 
         '''
 
@@ -112,26 +112,26 @@ class Workspace(object):
         while(reply.kind != zenoh.net.ZN_REPLY_FINAL):
             if(reply.kind == zenoh.net.ZN_STORAGE_DATA
                or reply.kind == zenoh.net.ZN_EVAL_DATA):
-                entry = Entry(reply.rname,
+                data = Data(reply.rname,
                               Value.from_zn_resource(reply.data, reply.info),
                               reply.info.tstamp)
                 if reply.rname not in resultsMap:
                     resultsMap[reply.rname] = set()
-                resultsMap[reply.rname].add(entry)
+                resultsMap[reply.rname].add(data)
             reply = q.get()
         q.task_done()
 
         results = []
         if(self.__isSelectorForSeries(selector)):
-            # return all entries
-            for path, entrySet in resultsMap.items():
-                for entry in sorted(entrySet):
-                    results.append(entry)
+            # return all data
+            for path, dataset in resultsMap.items():
+                for data in sorted(dataset):
+                    results.append(data)
         else:
-            # return only the latest entry for each path
-            for path, entrySet in resultsMap.items():
-                entries = sorted(entrySet)
-                results.append(entries[-1])
+            # return only the latest data for each path
+            for path, dataset in resultsMap.items():
+                dataset = sorted(dataset)
+                results.append(dataset[-1])
 
         return results
 

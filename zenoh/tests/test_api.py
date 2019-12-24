@@ -66,9 +66,9 @@ class APITest(unittest.TestCase):
         workspace = y.workspace('/myzenoh')
         d = Value('hello!', encoding=Encoding.STRING)
         self.assertTrue(workspace.put('/myzenoh/key1', d))
-        entry = workspace.get('/myzenoh/key1')[0]
-        self.assertEqual(entry.get_value(), d)
-        self.assertEqual(entry.get_path(), '/myzenoh/key1')
+        data = workspace.get('/myzenoh/key1')[0]
+        self.assertEqual(data.get_value(), d)
+        self.assertEqual(data.get_path(), '/myzenoh/key1')
         self.assertTrue(workspace.remove('/myzenoh/key1'))
         self.assertEqual(workspace.get('/myzenoh/key1'), [])
         admin.remove_storage(stid)
@@ -87,8 +87,8 @@ class APITest(unittest.TestCase):
             workspace.put('/myzenoh/big/{}'.format(i),
                           Value(v, encoding=Encoding.STRING))
 
-        entries = workspace.get('/myzenoh/big/**')
-        self.assertEqual(len(entries), 100)
+        dataset = workspace.get('/myzenoh/big/**')
+        self.assertEqual(len(dataset), 100)
         admin.remove_storage(stid)
         y.logout()
 
@@ -149,9 +149,9 @@ class APITest(unittest.TestCase):
                          encoding=Encoding.STRING)
 
         workspace.register_eval('/myzenoh/key1', cb)
-        entries = workspace.get('/myzenoh/key1?(hello=mondo)')
-        self.assertEqual(entries[0].get_path(), '/myzenoh/key1')
-        self.assertEqual(entries[0].get_value(),
+        dataset = workspace.get('/myzenoh/key1?(hello=mondo)')
+        self.assertEqual(dataset[0].get_path(), '/myzenoh/key1')
+        self.assertEqual(dataset[0].get_value(),
                          Value('mondo World!', encoding=Encoding.STRING))
         workspace.unregister_eval('/myzenoh/key1')
         admin.remove_storage(stid)

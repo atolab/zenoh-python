@@ -15,22 +15,22 @@
 import zenoh.net
 
 
-class Entry(object):
+class Data(object):
     def __init__(self, path, value, timestamp):
         self.path = path
         self.value = value
         self.timestamp = timestamp
 
     def __hash__(self):
-        # As timestamp is unique per entry, only hash the timestamp.
+        # As timestamp is unique per data, only hash the timestamp.
         return hash(self.timestamp)
 
     def __eq__(self, other):
-        # As timestamp is unique per entry, only compare timestamps.
+        # As timestamp is unique per data, only compare timestamps.
         return self.timestamp.__eq__(other.timestamp)
 
     def __lt__(self, other):
-        # order entries according to timestamps
+        # order data according to timestamps
         return self.timestamp.__lt__(other.timestamp)
 
     def get_path(self):

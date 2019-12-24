@@ -16,8 +16,8 @@ print('Use Workspace on "/"')
 w = z.workspace('/')
 
 print('Get from {}'.format(selector))
-for entry in w.get(selector):
-    print('  {} : {}'.format(entry.path, entry.value))
+for data in w.get(selector):
+    print('  {} : {}'.format(data.path, data.value))
 
 
 z.logout()

@@ -39,9 +39,9 @@ def eval_callback(path, properties):
 
     if name.startswith('/'):
         print('   >> Get name to use from Zenoh at path: {}'.format(name))
-        entries = w.get(name)
-        if len(entries) > 0:
-            name = entries[0].value
+        dataset = w.get(name)
+        if len(dataset) > 0:
+            name = dataset[0].value
 
     print('   >> Returning string: "Eval from {}"'.format(name))
     return Value('Eval from {}'.format(name), encoding=Encoding.STRING)

@@ -54,10 +54,10 @@ class Admin(object):
             zid = self.local
         s = '/@/router/{}/plugin/storages/backend/*'.format(
             zid)
-        entries = self.ws.get(s)
+        dataset = self.ws.get(s)
         return list(map(
-            lambda e: (e.get_path().split('/')[-1],
-                       e.get_value().value), entries))
+            lambda d: (d.get_path().split('/')[-1],
+                       d.get_value().value), dataset))
 
     def get_backend(self, beid, zid=None):
         '''
@@ -71,9 +71,9 @@ class Admin(object):
             zid = self.local
         s = '/@/router/{}/plugin/storages/backend/{}'.format(
             zid, beid)
-        entries = self.ws.get(s)
-        if len(entries) > 0:
-            return entries[0].get_value().value
+        dataset = self.ws.get(s)
+        if len(dataset) > 0:
+            return dataset[0].get_value().value
         return None
 
     def remove_backend(self, beid, zid=None):
@@ -125,10 +125,10 @@ class Admin(object):
             beid = '*'
         s = '/@/router/{}/plugin/storages/backend/{}/storage/*'.format(
             zid, beid)
-        entries = self.ws.get(s)
+        dataset = self.ws.get(s)
         return list(map(
-            lambda e: (e.get_path().split('/')[-1],
-                       e.get_value().value), entries))
+            lambda d: (d.get_path().split('/')[-1],
+                       d.get_value().value), dataset))
 
     def get_storage(self, stid, zid=None):
         '''
@@ -142,9 +142,9 @@ class Admin(object):
             zid = self.local
         s = '/@/router/{}/plugin/storages/backend/*/storage/{}'.format(
             zid, stid)
-        entries = self.ws.get(s)
-        if len(entries) > 0:
-            return entries[0].get_value().value
+        dataset = self.ws.get(s)
+        if len(dataset) > 0:
+            return dataset[0].get_value().value
         return None
 
     def remove_storage(self, stid, zid=None):
@@ -159,8 +159,8 @@ class Admin(object):
             zid = self.local
         s = '/@/router/{}/plugin/storages/backend/*/storage/{}'.format(
             zid, stid)
-        entries = self.ws.get(s)
-        if len(entries) > 0:
-            p = entries[0].get_path()
+        dataset = self.ws.get(s)
+        if len(dataset) > 0:
+            p = dataset[0].get_path()
             return self.ws.remove(p)
         return False
