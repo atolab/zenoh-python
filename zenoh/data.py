@@ -16,6 +16,12 @@ import zenoh.net
 
 
 class Data(object):
+    '''
+    A zenoh data returned by a :func:`Workspace.get` query.
+    The Data objects are comparable according to their :class:`core.Timestamp`.
+    Note that zenoh makes sure that each published path/value has a unique timestamp accross the system.
+    '''
+
     def __init__(self, path, value, timestamp):
         self.path = path
         self.value = value
@@ -34,10 +40,19 @@ class Data(object):
         return self.timestamp.__lt__(other.timestamp)
 
     def get_path(self):
+        '''
+        Returns the path of resource that changed.
+        '''
         return self.path
 
     def get_value(self):
+        '''
+        Returns the :class:`Value` of the data.
+        '''
         return self.value
 
     def get_timestamp(self):
+        '''
+        Returns the :class:`core.Timestamp` of the data.
+        '''
         return self.timestamp

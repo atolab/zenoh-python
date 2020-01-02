@@ -15,25 +15,20 @@
 import re
 import json
 import zenoh.net
-from enum import Enum
 from zenoh.core import ZException
 from zenoh.encoding import Encoding
 
 
-class ChangeKind(Enum):
-    PUT = zenoh.net.ZN_PUT
-    UPDATE = zenoh.net.ZN_UPDATE
-    REMOVE = zenoh.net.ZN_REMOVE
-
-
 class Value(object):
+    '''
+    Associated to a path, a Value can be published into zenoh
+    via :func:`Workspace.put`, or retrieved via :func:`Workspace.get` or
+    via a subscription (see :func:`Workspace.subscribe`).
+    '''
+
     def __init__(self, value, encoding=Encoding.RAW, raw_format=""):
         if encoding is None:
             encoding = Encoding.RAW
-        if encoding > Encoding.MAX:
-            raise ValueError('Encoding not supported')
-        if encoding == Encoding.PROTOBUF:
-            raise ValueError('PROTOBUF Encoding not implemented')
         self.encoding = encoding
         if self.encoding == Encoding.JSON:
             if not (isinstance(value, dict) or isinstance(value, str)):
@@ -48,15 +43,21 @@ class Value(object):
     def as_zn_payload(self):
         if self.encoding == Encoding.RAW:
             return bytes(self.value)
-        if self.encoding == Encoding.PROPERTY:
+        if self.encoding == Encoding.PROPERTIES:
             s = ';'.join(map('='.join, map(list, self.value.items())))
             return s.encode()
         return self.value.encode()
 
     def get_encoding(self):
+        '''
+        Return the :class:`Encoding` of this value.
+        '''
         return self.encoding
 
     def get_value(self):
+        '''
+        Return the content of the value.
+        '''
         if self.encoding is Encoding.JSON:
             return json.loads(self.value)
         return self.value
@@ -74,51 +75,10 @@ class Value(object):
 
     @staticmethod
     def from_zn_resource(buf, info):
-        encoding = Encoding.from_z_encoding(info.encoding)
+        encoding = Encoding(info.encoding)
         data = None
         if(encoding == Encoding.RAW):
             data = bytearray(buf)
         else:
             data = buf.decode()
         return Value(data, encoding)
-
-
-class Change(object):
-    kind_map = {
-            zenoh.net.ZN_PUT: ChangeKind.PUT,
-            zenoh.net.ZN_UPDATE: ChangeKind.UPDATE,
-            zenoh.net.ZN_REMOVE: ChangeKind.REMOVE
-    }
-
-    def __init__(self, path, kind, time, value=None):
-        self.path = path
-        self.time = time
-        self.value = value
-        if kind is None:
-            self.kind = ChangeKind.PUT
-        elif isinstance(kind, ChangeKind):
-            self.kind = kind
-        else:
-            self.kind = Change.kind_map[kind]
-
-    def get_path(self):
-        return self.path
-
-    def get_kind(self):
-        return self.kind
-
-    def get_time(self):
-        return self.time
-
-    def get_value(self):
-        return self.value
-
-    def __str__(self):
-        return 'Path: {} Kind: {} Time: {} Value: {}'.format(
-            self.path,
-            self.kind,
-            self.time,
-            self.value)
-
-    def __repr__(self):
-        return self.__str__()

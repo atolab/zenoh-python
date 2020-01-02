@@ -16,53 +16,34 @@
 
 from enum import Enum
 
-# TODO: This should be changed in enum
 
+class Encoding(Enum):
+    '''
+    A description of the :class:`Value` format, allowing zenoh to know
+    how to encode/decode the value to/from a bytes buffer.
+    '''
 
-class Encoding(object):
-    ZN_RAW_ENC = 0x00
-    ZN_CUSTOM_ENC = 0x01
-    ZN_STRING_ENC = 0x02
-    ZN_PROPERTIES_ENC = 0x03
-    ZN_JSON_ENC = 0x04
-    ZN_SQL_ENC = 0x05
+    RAW = 0x00
+    '''
+    The value has a RAW encoding (i.e. it's a bytes buffer).
+    '''
 
-    RAW = 0x01
     STRING = 0x02
-    JSON = 0x03
-    PROTOBUF = 0x04
-    SQL = 0x05
-    PROPERTY = 0x6
-    # The following are both invalid encoding,
-    # only numbers in this range are valid
-    MIN = 0x00
-    MAX = 0xff
+    '''
+    The value is an UTF-8 string.
+    '''
 
-    mapping = {
-        0x01: 0x00,
-        0x02: 0x02,
-        0x03: 0x04,
-        0x04: 0x01,
-        0x05: 0x05,
-        0x06: 0x03
-    }
+    PROPERTIES = 0x3
+    '''
+    The value if a list of keys/values, encoded as an UTF-8 string.
+    The keys/values are separated by ';' character, and each key is separated
+    from its associated value (if any) with a '=' character.
+    '''
 
-    reverse_mapping = {
-        0x00: 0x01,
-        0x02: 0x02,
-        0x04: 0x03,
-        0x01: 0x04,
-        0x05: 0x05,
-        0x03: 0x06
-    }
-
-    @staticmethod
-    def to_z_encoding(e):
-        return Encoding.mapping.get(e)
-
-    @staticmethod
-    def from_z_encoding(e):
-        return Encoding.reverse_mapping.get(e)
+    JSON = 0x04
+    '''
+    The value is a JSON structure in an UTF-8 string.
+    '''
 
 
 class TranscodingFallback(Enum):

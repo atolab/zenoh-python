@@ -18,5 +18,7 @@ from .admin import Admin
 from .encoding import *
 from . import exceptions
 from .selector import Selector
-from .value import Value, Change, ChangeKind
+from .value import Value
+from .change import Change, ChangeKind
+from .data import Data
 from .path import Path

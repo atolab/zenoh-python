@@ -20,9 +20,7 @@ from zenoh.net import Session, ZN_INFO_PEER_PID_KEY
 
 class Zenoh(object):
     '''
-
     The Zenoh client API.
-
     '''
 
     ZENOH_DEFAULT_PORT = 7447
@@ -33,18 +31,16 @@ class Zenoh(object):
     @staticmethod
     def login(locator, properties=None):
         '''
-
-        Establish a session with the Zenoh router reachable via provided
-        Zenoh locator. If the provided locator is ``None``, :func:`login`
-        will perform some dynamic discovery and try to establish the session
-        automatically. When not ``None``, the locator must have the format:
-        ``tcp/<ip>:<port>``.
+        Establish a zenoh session via a provided locator. Locator is a string
+        representing the network endpoint to which establish the session. If the 
+        provided locator is ``None``, login will perform some dynamic discovery and 
+        try to establish the session automatically. When not ``None``, the locator 
+        must have the format: ``tcp/<ip>:<port>`` (for instance ``tcp/127.0.0.1:7447``).
 
         :param locator: a Zenoh locator or ``None``.
         :param properties: the Properties to be used for this session
             (e.g. "user", "password", ...). Can be ``None``.
         :returns: a Zenoh object.
-
         '''
         zprops = {} if properties is None else {
             zenoh.net.ZN_USER_KEY if k == "user" else
@@ -54,12 +50,17 @@ class Zenoh(object):
 
         return Zenoh(Session.open(locator, zprops))
 
+    def logout(self):
+        '''
+        Terminates the Zenoh session.
+        '''
+        self.rt.close()
+
     def workspace(self, path, executor=None):
         '''
-
-        Creates a :class:`~zenoh.workspace.Workspace` using the
+        Creates a :class:`Workspace` using the
         provided path. All relative Selector or Path used with this
-        :class:`~zenoh.workspace.Workspace` will be relative to
+        :class:`Workspace` will be relative to
         this path.
 
         :param path: the Workspace's path.
@@ -68,26 +69,17 @@ class Zenoh(object):
             If not ``None``, all subscription listeners and eval callbacks are
             executed by the provided executor. This is useful when listeners
             and/or callbacks need to perform long operations or need to call
-            operations like :func:`~zenoh.workspace.Workspace.get`.
-        :returns: a :class:`~zenoh.workspace.Workspace`.
-
+            operations like :func:`Workspace.get`.
+        :returns: a :class:`Workspace`.
         '''
         return Workspace(self.rt, path, executor)
 
-    def logout(self):
-        '''
-
-        Terminates this session.
-
-        '''
-        self.rt.close()
-
     def admin(self):
         '''
-
-        Creates an admin workspace that provides helper operations to
+        Returns the admin object that provides helper operations to
         administer Zenoh.
 
+        :returns: a :class:`Admin`.
         '''
         return Admin(self.workspace(
             '/@/{}'.format(

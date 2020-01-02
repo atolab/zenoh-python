@@ -16,7 +16,8 @@ from queue import Queue
 from zenoh.encoding import Encoding, TranscodingFallback
 from zenoh.path import Path
 from zenoh.selector import Selector
-from zenoh.value import Value, Change
+from zenoh.value import Value
+from zenoh.change import Change
 from zenoh.data import Data
 import zenoh.net
 from zenoh.net import *
@@ -24,9 +25,7 @@ from zenoh.net import *
 
 class Workspace(object):
     '''
-
     A Workspace to operate on Zenoh.
-
     '''
 
     def __init__(self, runtime, path, executor=None):
@@ -43,31 +42,25 @@ class Workspace(object):
 
     def put(self, path, value):
         '''
-
         Put a path/value into Zenoh.
 
-        :param path: the Path. Can be absolute or relative to the workspace.
-        :param value: the value.
-
+        :param path: the path. Can be absolute or relative to the workspace.
+        :param value: the :class:`Value`.
         '''
-
         self.rt.write_data(
             self.__to_absolute(path),
             value.as_zn_payload(),
-            Encoding.to_z_encoding(value.get_encoding()),
+            value.get_encoding().value,
             zenoh.net.ZN_PUT)
         return True
 
     def update(self, path, value):
         '''
-
         Update a path/value into Zenoh.
 
-        :param path: the Path. Can be absolute or relative to the workspace.
+        :param path: the path. Can be absolute or relative to the workspace.
         :param value: a delta to be applied on the existing value.
-
         '''
-
         raise NotImplementedError("Update not yet implemented ...")
 
     def __isSelectorForSeries(self, selector):
@@ -82,14 +75,11 @@ class Workspace(object):
     def get(self, selector, encoding=Encoding.RAW,
                 fallback=TranscodingFallback.KEEP):
         '''
-
         Get a selection of path/value from Zenoh.
 
         :param selector: the selector expressing the selection.
-        :returns: a list of data.
-
+        :returns: a list of :class:`Data`.
         '''
-
         q = Queue()
 
         def callback(reply_value):
@@ -137,14 +127,11 @@ class Workspace(object):
 
     def remove(self, path):
         '''
-
         Remove a path/value from Zenoh.
 
-        :param path: the Path to be removed.
+        :param path: the path to be removed.
             Can be absolute or relative to the workspace.
-
         '''
-
         self.rt.write_data(
             self.__to_absolute(path),
             "".encode(),
@@ -154,16 +141,14 @@ class Workspace(object):
 
     def subscribe(self, selector, listener):
         '''
-
         Subscribe to a selection of path/value from Zenoh.
 
         :param selector: the selector expressing the selection.
-        :param listener: the Listener that will be called for each change of
-            a path/value matching the selection.
+        :param listener: the listener is an operation taking a list of
+            :class:`Change` as unique argument.
+            It will be called for each change of a path/value matching the selection.
         :returns: a subscription id.
-
         '''
-
         selector = self.__to_absolute(selector)
         if(listener is not None):
             def callback(rname, data, info):
@@ -171,13 +156,13 @@ class Workspace(object):
                     listener([Change(
                         rname,
                         info.kind,
-                        info.tstamp.time if info.tstamp is not None else None,
+                        info.tstamp if info.tstamp is not None else None,
                         Value.from_zn_resource(data, info))])
                 else:
                     self.executor.submit(listener, [Change(
                         rname,
                         info.kind,
-                        info.tstamp.time if info.tstamp is not None else None,
+                        info.tstamp if info.tstamp is not None else None,
                         Value.from_zn_resource(data, info))])
             return self.rt.declare_subscriber(
                 selector,
@@ -193,27 +178,27 @@ class Workspace(object):
 
     def unsubscribe(self, subscription_id):
         '''
-
         Unregisters a previous subscription.
 
         :param subscription_id: the subscription id to unregister.
-
         '''
-
         self.rt.undeclare_subscriber(subscription_id)
         return True
 
     def register_eval(self, path, callback):
         '''
-
         Registers an evaluation function under the provided path.
 
-        :param path: the Path where the function can be triggered using
-            :func:`~zenoh.workspace.Workspace.get`.
-        :param callback: the evaluation function.
+        :param path: the path where the function can be triggered using
+            :func:`Workspace.get`.
 
+        :param callback: the evaluation function. This function must take 2 parameters:
+
+            1. **path**: the path that has been used to register the triggered eval function.
+            2. **properties**: the properties specified in the selector used for the get() operation.
+
+            And it must return a :class:`Value`
         '''
-
         path = self.__to_absolute(path)
 
         def query_handler(path_selector, content_selector, send_replies):
@@ -223,7 +208,7 @@ class Workspace(object):
                 value = callback(path, args)
                 info = zn_data_info_t()
                 info.flags = 0x60
-                info.encoding = Encoding.to_z_encoding(value.get_encoding())
+                info.encoding = value.get_encoding().value
                 info.kind = ZN_PUT
                 send_replies([(path, (value.as_zn_payload(), info))])
             if self.executor is None:
@@ -243,13 +228,10 @@ class Workspace(object):
 
     def unregister_eval(self, path):
         '''
-
         Unregister a previously registered evaluation function.
 
         :param path: the path where the function has been registered.
-
         '''
-
         path = self.__to_absolute(path)
         for (evalpath, zeval) in self.evals:
             if evalpath == path:

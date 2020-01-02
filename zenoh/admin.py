@@ -40,7 +40,7 @@ class Admin(object):
             zid = self.local
         path = '/@/router/{}/plugin/storages/backend/{}'.format(
             zid, beid)
-        value = Value(properties, encoding=Encoding.PROPERTY)
+        value = Value(properties, encoding=Encoding.PROPERTIES)
         return self.ws.put(path, value)
 
     def get_backends(self, zid=None):
@@ -49,6 +49,7 @@ class Admin(object):
 
         :param zid: the UUID of the Zenoh router. If ``None``, the local
             Zenoh router.
+        :returns: a list of (backend_id, properties) tuples.
         '''
         if(zid is None):
             zid = self.local
@@ -66,6 +67,7 @@ class Admin(object):
         :param beid: the Id of the backend.
         :param zid: the UUID of the Zenoh router. If ``None``, the local
             Zenoh router.
+        :returns: the backend properties.
         '''
         if(zid is None):
             zid = self.local
@@ -108,7 +110,7 @@ class Admin(object):
             beid = 'auto'
         p = '/@/router/{}/plugin/storages/backend/{}/storage/{}'.format(
             zid, beid, stid)
-        v = Value(properties, encoding=Encoding.PROPERTY)
+        v = Value(properties, encoding=Encoding.PROPERTIES)
         return self.ws.put(p, v)
 
     def get_storages(self, beid=None, zid=None):
@@ -118,6 +120,7 @@ class Admin(object):
         :param beid: the Id of the backend. If ``None``, all backends.
         :param zid: the UUID of the Zenoh router. If ``None``, the local
             Zenoh router.
+        :returns: a list of (storage_id, properties) tuples.
         '''
         if(zid is None):
             zid = self.local
@@ -137,6 +140,7 @@ class Admin(object):
         :param stid: the Id of the storage.
         :param zid: the UUID of the Zenoh router. If ``None``, the local
             Zenoh router.
+        :returns: the storage properties.
         '''
         if(zid is None):
             zid = self.local
