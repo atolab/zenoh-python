@@ -29,12 +29,12 @@ class Admin(object):
 
     def add_backend(self, beid, properties, zid=None):
         '''
-        Add a backend in the specified Zenoh router.
+        Add a backend in the specified zenoh router.
 
         :param beid: the Id of the backend.
         :param propertiers: some configuration for the backend.
-        :param zid: the UUID of the Zenoh router. If ``None``, the local
-            Zenoh router.
+        :param zid: the UUID of the zenoh router.
+            If ``None``, it's the zenoh router you are directly connected to.
         '''
         if(zid is None):
             zid = self.local
@@ -45,10 +45,10 @@ class Admin(object):
 
     def get_backends(self, zid=None):
         '''
-        Get all the backends from the specified Zenoh router.
+        Get all the backends from the specified zenoh router.
 
-        :param zid: the UUID of the Zenoh router. If ``None``, the local
-            Zenoh router.
+        :param zid: the UUID of the zenoh router.
+            If ``None``, it's the zenoh router you are directly connected to.
         :returns: a list of (backend_id, properties) tuples.
         '''
         if(zid is None):
@@ -62,11 +62,11 @@ class Admin(object):
 
     def get_backend(self, beid, zid=None):
         '''
-        Get backend's properties from the specified Zenoh router.
+        Get backend's properties from the specified zenoh router.
 
         :param beid: the Id of the backend.
-        :param zid: the UUID of the Zenoh router. If ``None``, the local
-            Zenoh router.
+        :param zid: the UUID of the zenoh router.
+            If ``None``, it's the zenoh router you are directly connected to.
         :returns: the backend properties.
         '''
         if(zid is None):
@@ -80,11 +80,11 @@ class Admin(object):
 
     def remove_backend(self, beid, zid=None):
         '''
-        Remove a backend from the specified Zenoh router.
+        Remove a backend from the specified zenoh router.
 
         :param beid: the Id of the backend.
-        :param zid: the UUID of the Zenoh router. If ``None``, the local
-            Zenoh router.
+        :param zid: the UUID of the zenoh router.
+            If ``None``, it's the zenoh router you are directly connected to.
         '''
         if(zid is None):
             zid = self.local
@@ -94,15 +94,15 @@ class Admin(object):
 
     def add_storage(self, stid, properties, beid=None, zid=None):
         '''
-        Adds a storage in the specified Zenoh router, using the specified
+        Adds a storage in the specified zenoh router, using the specified
         backend.
 
         :param stid: the Id of the storage.
         :param propertiers: some configuration for the storage.
         :param beid: the Id of the backend. If ``None``, a backend is
             automatically selected.
-        :param zid: the UUID of the Zenoh router. If ``None``, the local
-            Zenoh router.
+        :param zid: the UUID of the zenoh router.
+            If ``None``, it's the zenoh router you are directly connected to.
         '''
         if(zid is None):
             zid = self.local
@@ -115,11 +115,11 @@ class Admin(object):
 
     def get_storages(self, beid=None, zid=None):
         '''
-        Get all the storages from the specified Zenoh router.
+        Get all the storages from the specified zenoh router.
 
         :param beid: the Id of the backend. If ``None``, all backends.
-        :param zid: the UUID of the Zenoh router. If ``None``, the local
-            Zenoh router.
+        :param zid: the UUID of the zenoh router.
+            If ``None``, it's the zenoh router you are directly connected to.
         :returns: a list of (storage_id, properties) tuples.
         '''
         if(zid is None):
@@ -135,11 +135,11 @@ class Admin(object):
 
     def get_storage(self, stid, zid=None):
         '''
-        Get storage's properties from the specified Zenoh router.
+        Get storage's properties from the specified zenoh router.
 
         :param stid: the Id of the storage.
-        :param zid: the UUID of the Zenoh router. If ``None``, the local
-            Zenoh router.
+        :param zid: the UUID of the zenoh router.
+            If ``None``, it's the zenoh router you are directly connected to.
         :returns: the storage properties.
         '''
         if(zid is None):
@@ -153,11 +153,11 @@ class Admin(object):
 
     def remove_storage(self, stid, zid=None):
         '''
-        Remove a backend from the specified Zenoh router.
+        Remove a backend from the specified zenoh router.
 
         :param stid: the Id of the storage.
-        :param zid: the UUID of the Zenoh router. If ``None``, the local
-            Zenoh router.
+        :param zid: the UUID of the zenoh router.
+            If ``None``, it's the zenoh router you are directly connected to.
         '''
         if(zid is None):
             zid = self.local
