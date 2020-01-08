@@ -135,7 +135,7 @@ class Workspace(object):
         self.rt.write_data(
             self.__to_absolute(path),
             "".encode(),
-            Encoding.ZN_RAW_ENC,
+            Encoding.RAW.value,
             zenoh.net.ZN_REMOVE)
         return True
 

@@ -219,7 +219,7 @@ class Session(object):
             self.session = r.value.session
             self.connected = True
         else:
-            raise ZException('Unable to open zenoh session', r.value.error)
+            raise ZException('Unable to open zenoh-net session', r.value.error)
 
         self.zlib.zn_start_recv_loop(self.session)
         while not self.running:
@@ -228,7 +228,7 @@ class Session(object):
     @staticmethod
     def open(locator=None, properties={}):
         """
-        Open a zenoh session.
+        Open a zenoh-net session.
 
         :param locator: a string representing the network endpoint to which
             establish the session. A typical locator looks like this :
@@ -239,7 +239,7 @@ class Session(object):
             **properties** will typically contain the username and
             password informations needed to establish the zenoh session
             with a secured infrastructure. It can be set to ``NULL``.
-        :returns: a handle to the zenoh session.
+        :returns: a handle to the zenoh-net session.
 
         """
         return Session(locator, properties)
@@ -247,7 +247,7 @@ class Session(object):
     def info(self):
         """
         Return a {int: bytes} dictionary of properties containing various
-        informations about the established zenoh session.
+        informations about the established zenoh-net session.
 
         :returns: a {int: bytes} dictionary of properties.
 
@@ -258,37 +258,37 @@ class Session(object):
     def running(self):
         return (self.zlib.zn_running(self.session) != 0)
 
-    def declare_publisher(self, res_name):
+    def declare_publisher(self, resource):
         """
-        Declare a publication for resource **res_name**.
+        Declare a publication for resource name **resource**.
 
-        :param res_name: is the resource name to publish.
-        :returns: a zenoh publisher.
+        :param resource: is the resource name to publish.
+        :returns: a zenoh-net publisher.
 
         """
-        r = self.zlib.zn_declare_publisher(self.session, res_name.encode())
+        r = self.zlib.zn_declare_publisher(self.session, resource.encode())
         if r.tag == 0:
             return r.value.pub
         else:
             raise ZException('Unable to create publisher', r.value.error)
 
-    def declare_subscriber(self, selector, sub_mode, callback):
+    def declare_subscriber(self, resource, sub_mode, callback):
         """
         Declare a subscription for all published data matching the provided
-        resource **selector**.
+        resource name **resource**.
 
-        :param selector: the selection of resource to subscribe to.
+        :param resource: the resource name to subscribe to.
         :param sub_mode: the subscription mode.
         :param callback: the callback function that will be called each time a
-            data matching the subscribed resource is received.
-        :returns: a zenoh subscriber.
+            data matching the subscribed resource namle **resource** is received.
+        :returns: a zenoh-net subscriber.
 
         """
         global subscriberCallbackMap
         h = hash(callback)
         k = POINTER(c_int64)(c_int64(h))
         r = self.zlib.zn_declare_subscriber(self.session,
-                                            selector.encode(),
+                                            resource.encode(),
                                             byref(sub_mode.zn_sm),
                                             zn_subscriber_trampoline_callback,
                                             k)
@@ -299,20 +299,22 @@ class Session(object):
             del subscriberCallbackMap[h]
             raise ZException('Unable to create subscriber', r.value.error)
 
-    def declare_storage(self, selector, subscriber_callback, query_handler):
+    def declare_storage(self, resource, subscriber_callback, query_handler):
         """
-        Declare a storage for all data matching the provided resource
-        **selector**.
+        Declare a storage for all data matching the provided resource name
+        **resource**.
 
-        :param selector: the selection of resources to store.
+        :param resource: the the resource selection to store.
         :param subscriber_callback: the callback function that will be called
-            each time a data matching the stored selection is received.
+            each time a data matching the stored resource name **resource**
+            is received.
         :param query_handler: the callback function that will be called each
-            time a query for data matching the stored selection is received.
+            time a query for data matching the stored resource name **resource**
+            is received.
             The **query_handler** function MUST call the provided
             **send_replies** function with the resulting data.
             **send_replies** can be called with an empty array.
-        :returns: a zenoh storage.
+        :returns: a zenoh-net storage.
 
         """
         global replyCallbackMap
@@ -322,7 +324,7 @@ class Session(object):
         queryHandlerMap[h] = (k, query_handler)
         r = self.zlib.zn_declare_storage(
                 self.session,
-                selector.encode(),
+                resource.encode(),
                 zn_subscriber_trampoline_callback,
                 zn_query_handler_trampoline,
                 k)
@@ -333,17 +335,17 @@ class Session(object):
             del replyCallbackMap[h]
             raise ZException('Unable to create storage', r.value.error)
 
-    def declare_eval(self, selector, query_handler):
+    def declare_eval(self, resource, query_handler):
         """
         Declare an eval able to provide data matching the provided resource
-        **selector**.
+        name **resource**.
 
-        :param selector: the selection of resources to evaluate.
+        :param resource: the resource to evaluate.
         :param query_handler: is the callback function that will be called
-            each time a query for data matching the evaluated **selector**
-            is received. The **query_handler** function MUST call the provided
-            **send_replies** function with the resulting data.
-            **send_replies** can be called with an empty array.
+            each time a query for data matching the evaluated resource name
+             **resource** is received. The **query_handler** function MUST
+             call the provided **send_replies** function with the resulting
+             data. **send_replies** can be called with an empty array.
         :returns: a zenoh eval.
 
         """
@@ -353,7 +355,7 @@ class Session(object):
         queryHandlerMap[h] = (k, query_handler)
         r = self.zlib.zn_declare_eval(
                 self.session,
-                selector.encode(),
+                resource.encode(),
                 zn_query_handler_trampoline,
                 k)
         if r.tag == 0:
@@ -362,14 +364,13 @@ class Session(object):
             del replyCallbackMap[h]
             raise ZException('Unable to create eval', r.value.error)
 
-    def stream_compact_data(self, pub, data):
+    def stream_compact_data(self, pub, payload):
         """
         Send data in a *compact_data* message for the resource published by
         publisher **pub**.
 
         :param pub: the publisher to use to send data.
-        :param payload: a pointer to the data to be sent.
-        :param len: the size of the data to be sent.
+        :param payload: a the data to be sent as bytes.
         :returns: 0 if the publication is successful.
 
         """
@@ -413,7 +414,7 @@ class Session(object):
     def pull(self, sub):
         """
         Pull data for the `ZN_PULL_MODE` or `ZN_PERIODIC_PULL_MODE`
-        subscribtion **sub** from the nearest infrastruture component.
+        subscription **sub**.
         The pulled data will be provided by calling the **data_handler**
         function provided to the **declare_subscriber** function.
 
@@ -422,13 +423,13 @@ class Session(object):
         """
         self.zlib.zn_pull(sub)
 
-    def query(self, selector, predicate, callback,
+    def query(self, resource, predicate, callback,
               dest_storages=QueryDest(QueryDest.ZN_BEST_MATCH),
               dest_evals=QueryDest(QueryDest.ZN_BEST_MATCH)):
         """
-        Query data matching selection **selector**.
+        Query data matching resource name **resource**.
 
-        :param selector: the selection of resource to query.
+        :param resource: the resource to query.
         :param predicate: a string that will be  propagated to the storages
             and evals that should provide the queried data. It may allow them
             to filter, transform and/or compute the queried data.
@@ -445,7 +446,7 @@ class Session(object):
         k = POINTER(c_int64)(c_int64(h))
         replyCallbackMap[h] = (k, callback)
         r = self.zlib.zn_query_wo(self.session,
-                                  selector.encode(),
+                                  resource.encode(),
                                   predicate.encode(),
                                   zn_reply_trampoline_callback,
                                   k,

@@ -132,14 +132,14 @@ class zn_data_info_t(Structure):
 
 class DataInfo():
     """
-    An object containing meta informations about some associated data.
+    Data structure containing meta informations about the associated data.
 
     kind
         The kind of the data.
     encoding
         The encoding of the data.
     tstamp
-        The unique timestamp at which the data was produced.
+        The unique Timestamp at which the data was produced.
 
     """
 
@@ -159,6 +159,18 @@ class DataInfo():
 
 # Query destination
 class zn_query_dest_t(Structure):
+    """
+    Data structure defining which storages or evals should be destination of a query (see Session.query())
+
+    kind
+        One of the following destination kinds:
+            ZN_BEST_MATCH the nearest complete storage/eval if there is one, all storages/evals if not.
+            ZN_COMPLETE only complete storages/evals.
+            ZN_ALL all storages/evals.
+            ZN_NONE no storages/evals.
+    nb
+        The number of storages or evals that should be destination of the query when zn_query_dest_t.kind equals ZN_COMPLETE
+    """
     _fields_ = [('kind', c_uint8), ('nb', c_uint8)]
 
 

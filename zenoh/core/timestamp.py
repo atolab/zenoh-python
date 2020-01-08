@@ -5,6 +5,18 @@ import binascii
 
 # Timestamp
 class Timestamp(Structure):
+    '''
+    Data structure representing a unique timestamp.
+
+    time
+        The time as a 64-bit long, where:
+        - The higher 32-bit represent the number of seconds
+            since midnight, January 1, 1970 UTC
+        - The lower 32-bit represent a fraction of 1 second.
+
+    clock_id
+        The unique identifier of the clock that generated this timestamp.
+    '''
     _fields_ = [('clock_id', c_uint8 * 16),
                 ('time', c_size_t)]
 
@@ -47,7 +59,7 @@ class Timestamp(Structure):
 
     def floattime(self):
         """
-        Return the Timestamp's creation time as a float
+        Return the time as a float
         (i.e. number of seconds since Epoch:  January 1, 1970, 00:00:00 (UTC))
         
         Warning: the time might be rounded, depending the float precision on
@@ -62,7 +74,7 @@ class Timestamp(Structure):
 
     def datetime(self, tzinfo=None):
         """
-        Return the Timestamp's creation time as a :py:class:`datetime.datetime`
+        Return the time as a :py:class:`datetime.datetime`
         
         Warning: the time is rounded to milliseconds as datetime precision
         is millisecond.
