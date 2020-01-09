@@ -32,10 +32,11 @@ class Zenoh(object):
     def login(locator, properties=None):
         '''
         Establish a zenoh session via a provided locator. Locator is a string
-        representing the network endpoint to which establish the session. If the 
-        provided locator is ``None``, login will perform some dynamic discovery and 
-        try to establish the session automatically. When not ``None``, the locator 
-        must have the format: ``tcp/<ip>:<port>`` (for instance ``tcp/127.0.0.1:7447``).
+        representing the network endpoint to which establish the session. If
+        the provided locator is ``None``, login will perform some dynamic
+        discovery and try to establish the session automatically. When not
+        ``None``, the locator must have the format: ``tcp/<ip>:<port>``
+        (for instance ``tcp/127.0.0.1:7447``).
 
         :param locator: a Zenoh locator or ``None``.
         :param properties: the Properties to be used for this session

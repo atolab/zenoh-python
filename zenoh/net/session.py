@@ -280,7 +280,8 @@ class Session(object):
         :param resource: the resource name to subscribe to.
         :param sub_mode: the subscription mode.
         :param callback: the callback function that will be called each time a
-            data matching the subscribed resource namle **resource** is received.
+            data matching the subscribed resource namle **resource** is
+            received.
         :returns: a zenoh-net subscriber.
 
         """
@@ -309,8 +310,8 @@ class Session(object):
             each time a data matching the stored resource name **resource**
             is received.
         :param query_handler: the callback function that will be called each
-            time a query for data matching the stored resource name **resource**
-            is received.
+            time a query for data matching the stored resource name
+            **resource** is received.
             The **query_handler** function MUST call the provided
             **send_replies** function with the resulting data.
             **send_replies** can be called with an empty array.

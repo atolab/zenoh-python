@@ -46,20 +46,6 @@ class ValueTests(unittest.TestCase):
         self.assertEqual(d, v.get_value())
         self.assertEqual(Encoding.JSON, v.encoding)
 
-    def test_sql_value(self):
-        sql = ['this', 'is', 'a', 'sql', 'value']
-        v = Value(sql, encoding=Encoding.SQL)
-        self.assertEqual(sql, v.get_value())
-        self.assertEqual(Encoding.SQL, v.encoding)
-
-    def test_pb_value(self):
-        pb = 'some protobuf...'
-        self.assertRaises(ValueError, Value, pb, Encoding.PROTOBUF)
-
-    def test_unsupported_value(self):
-        pb = 'some value...'
-        self.assertRaises(ValueError, Value, pb, 0x100)
-
     def test_not_valid_json(self):
         nvj = ['hello!']
         self.assertRaises(ZException, Value, nvj, Encoding.JSON)
@@ -81,8 +67,8 @@ class ValueTests(unittest.TestCase):
 
     def test_change(self):
         v1 = Value('test string value', encoding=Encoding.STRING)
-        c = Change('/test', ChangeKind.PUT, 1234, v1)
+        c = Change('/test', ChangeKind.PUT, None, v1)
         self.assertEqual('/test', c.get_path())
         self.assertEqual(ChangeKind.PUT, c.get_kind())
         self.assertEqual(v1, c.get_value())
-        self.assertEqual(1234, c.get_time())
+        self.assertEqual(None, c.get_timestamp())

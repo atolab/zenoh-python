@@ -145,8 +145,8 @@ class Workspace(object):
 
         :param selector: the selector expressing the selection.
         :param listener: the listener is an operation taking a list of
-            :class:`Change` as unique argument.
-            It will be called for each change of a path/value matching the selection.
+            :class:`Change` as unique argument. It will be called for each
+            change of a path/value matching the selection.
         :returns: a subscription id.
         '''
         selector = self.__to_absolute(selector)
@@ -192,10 +192,13 @@ class Workspace(object):
         :param path: the path where the function can be triggered using
             :func:`Workspace.get`.
 
-        :param callback: the evaluation function. This function must take 2 parameters:
+        :param callback: the evaluation function. This function must take 2
+            parameters:
 
-            1. **path**: the path that has been used to register the triggered eval function.
-            2. **properties**: the properties specified in the selector used for the get() operation.
+            1. **path**: the path that has been used to register the triggered
+               eval function.
+            2. **properties**: the properties specified in the selector used
+               for the get() operation.
 
             And it must return a :class:`Value`
         '''

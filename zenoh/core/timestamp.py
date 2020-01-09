@@ -61,7 +61,7 @@ class Timestamp(Structure):
         """
         Return the time as a float
         (i.e. number of seconds since Epoch:  January 1, 1970, 00:00:00 (UTC))
-        
+
         Warning: the time might be rounded, depending the float precision on
         your host.
 
@@ -75,13 +75,16 @@ class Timestamp(Structure):
     def datetime(self, tzinfo=None):
         """
         Return the time as a :py:class:`datetime.datetime`
-        
+
         Warning: the time is rounded to milliseconds as datetime precision
         is millisecond.
 
         :param tzinfo: optional argument. If ``None`` or not specified,
-            the timestamp is converted to the platform’s local date and time, and the returned datetime object is naive.
-            If not ``None``, it must be an instance of a :py:class:`datetime.tzinfo` subclass, and the timestamp is converted to tz’s time zone.
+            the timestamp is converted to the platform’s local date and time,
+            and the returned datetime object is naive.
+            If not ``None``, it must be an instance of a
+            :py:class:`datetime.tzinfo` subclass, and the timestamp is
+            converted to tz’s time zone.
         :returns: the time as a :py:class:`datetime.datetime`
         """
         return datetime.datetime.fromtimestamp(self.floattime(), tzinfo)

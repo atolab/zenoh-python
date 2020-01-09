@@ -19,7 +19,8 @@ class Data(object):
     '''
     A zenoh data returned by a :func:`Workspace.get` query.
     The Data objects are comparable according to their :class:`core.Timestamp`.
-    Note that zenoh makes sure that each published path/value has a unique timestamp accross the system.
+    Note that zenoh makes sure that each published path/value has a unique
+    timestamp accross the system.
     '''
 
     def __init__(self, path, value, timestamp):
