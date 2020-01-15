@@ -7,7 +7,7 @@ curl -L -o zenohd https://github.com/atolab/atobin/raw/master/zenoh/unstable/ubu
 curl -L -o zenoh-plugin-storages.cmxs https://github.com/atolab/atobin/raw/master/zenoh-storages/unstable/ubuntu/16.04/zenoh-plugin-storages.cmxs
 chmod +x $RD/zenohd
 chmod +x $RD/zenoh-plugin-storages.cmxs
-$RD/zenohd -P "$RD/zenoh-plugin-storages.cmxs -w" --verbosity=debug > $RD/zenohd.out 2>&1 & echo $! > $RD/zenohd.pid
+$RD/zenohd -P "$RD/zenoh-plugin-storages.cmxs" --verbosity=debug > $RD/zenohd.out 2>&1 & echo $! > $RD/zenohd.pid
 ZPID=$(<"$RD/zenohd.pid")
 sleep 2;
 cat $RD/zenohd.out
