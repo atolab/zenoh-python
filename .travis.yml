@@ -5,12 +5,13 @@ before_install:
 addons:
   apt:
     update: true
-dist: xenial
+dist: bionic
 language: python
 python:
   - "3.5"
   - "3.6"
   - "3.7"
+  - "3.8"
 env:
   matrix:
   - TOXENV=py3
