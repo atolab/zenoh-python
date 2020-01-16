@@ -1,4 +1,4 @@
-# Copyright (c) 2018 ADLINK Technology Inc.
+# Copyright (c) 2020 ADLINK Technology Inc.
 #
 # See the NOTICE file(s) distributed with this work for additional
 # information regarding copyright ownership.
