@@ -13,6 +13,7 @@
 # Contributors: Julien Enoch, ADLINK Technology Inc.
 # Initial implementation of Eclipse Zenoh.
 
+
 class ZException(Exception):
     def __get_code_name(self, code):
         codes = {

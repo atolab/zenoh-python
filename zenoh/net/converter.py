@@ -13,6 +13,7 @@
 # Contributors: Julien Enoch, ADLINK Technology Inc.
 # Initial implementation of Eclipse Zenoh.
 
+
 def int_to_byte(i):
     return i.to_bytes(1, byteorder='big')
 
