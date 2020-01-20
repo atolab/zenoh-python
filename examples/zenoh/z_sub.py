@@ -10,8 +10,10 @@
 #
 # SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 #
-# Contributors: Julien Enoch, ADLINK Technology Inc.
-# Initial implementation of Eclipse Zenoh.
+# Contributors:
+# Angelo Corsaro <angelo.corsaro@adlinktech.com>
+# Olivier Hecart <olivier.hecart@adlinktech.com>
+# Julien Enoch   <julien.enoch@adlinktech.com>
 
 import sys
 from zenoh import Zenoh, Selector, Path, Workspace

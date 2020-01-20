@@ -10,7 +10,10 @@
 #
 # SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
 #
-# Contributors: Angelo Corsaro, ADLINK Technology Inc. - Zenoh API refactoring
+# Contributors:
+# Angelo Corsaro <angelo.corsaro@adlinktech.com> - Zenoh API refactoring
+# Olivier Hecart <olivier.hecart@adlinktech.com>
+# Julien Enoch   <julien.enoch@adlinktech.com>
 
 from .zenoh import Zenoh
 from .workspace import Workspace
