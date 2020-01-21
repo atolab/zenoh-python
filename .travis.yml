@@ -1,6 +1,6 @@
 before_install:
   - sudo apt-get install -y libssl1.0.0 libev4
-  - sudo curl -L -o /usr/local/lib/libzenohc.so https://github.com/atolab/atobin/raw/master/zenoh-c/unstable/ubuntu/16.04/libzenohc.so
+  - sudo curl -L -o /usr/local/lib/libzenohc.so https://github.com/atolab/atobin/raw/master/zenoh-c/unstable/ubuntu/18.04/libzenohc.so
   - sudo apt install -y python3-pip
 addons:
   apt:

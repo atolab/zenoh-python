@@ -3,8 +3,8 @@
 WD=$(pwd)
 cd $(mktemp -d)
 RD=$(pwd)
-curl -L -o zenohd https://github.com/atolab/atobin/raw/master/zenoh/unstable/ubuntu/16.04/zenohd
-curl -L -o zenoh-plugin-storages.cmxs https://github.com/atolab/atobin/raw/master/zenoh-storages/unstable/ubuntu/16.04/zenoh-plugin-storages.cmxs
+curl -L -o zenohd https://github.com/atolab/atobin/raw/master/zenoh/unstable/ubuntu/18.04/zenohd
+curl -L -o zenoh-plugin-storages.cmxs https://github.com/atolab/atobin/raw/master/zenoh-storages/unstable/ubuntu/18.04/zenoh-plugin-storages.cmxs
 chmod +x $RD/zenohd
 chmod +x $RD/zenoh-plugin-storages.cmxs
 $RD/zenohd -P "$RD/zenoh-plugin-storages.cmxs" --verbosity=debug > $RD/zenohd.out 2>&1 & echo $! > $RD/zenohd.pid
