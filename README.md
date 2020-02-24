@@ -1,9 +1,9 @@
 ![zenoh banner](./zenoh-dragon.png)
 
-[![Build Status](https://travis-ci.com/atolab/zenoh-python.svg?branch=master)](https://travis-ci.com/atolab/zenoh-python)
+[![Build Status](https://travis-ci.com/eclipse-zenoh/zenoh-python.svg?branch=master)](https://travis-ci.com/eclipse-zenoh/zenoh-python)
 [![License](https://img.shields.io/badge/License-EPL%202.0-blue)](https://choosealicense.com/licenses/epl-2.0/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![codecov](https://codecov.io/gh/atolab/zenoh-python/branch/master/graph/badge.svg)](https://codecov.io/gh/atolab/zenoh-python)
+[![codecov](https://codecov.io/gh/eclipse-zenoh/zenoh-python/branch/master/graph/badge.svg)](https://codecov.io/gh/eclipse-zenoh/zenoh-python)
 [![Documentation Status](https://readthedocs.org/projects/zenoh-python/badge/?version=latest)](https://zenoh-python.readthedocs.io/en/latest/?badge=latest)
 [![Gitter](https://badges.gitter.im/atolab/zenoh.svg)](https://gitter.im/atolab/zenoh?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
@@ -16,8 +16,8 @@ The Python API is for pure clients, in other terms does not support peer-to-peer
 tested with our demo instace available at **demo.zenoh.io**.
 
 ## Dependencies
-The zenoh-python API depends on the [zenoh-c](https://github.com/atolab/zenoh-c) API. Thus the first thing to do is to ensure that 
-**zenoh-c** in installed on your machine. To do so, please follow the instructions provided [here](https://github.com/atolab/zenoh-c/blob/master/README.md).
+The zenoh-python API depends on the [zenoh-c](https://github.com/eclipse-zenoh/zenoh-c) API. Thus the first thing to do is to ensure that 
+**zenoh-c** in installed on your machine. To do so, please follow the instructions provided [here](https://github.com/eclipse-zenoh/zenoh-c/blob/master/README.md).
 
 ## Installing the Python API from Sources
 To install the API you can do:

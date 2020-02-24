@@ -22,7 +22,7 @@ class APILogger:
 
             log_format = '[%(asctime)s] - [%(levelname)s] > %(message)s'
 
-            self.logger = logging.getLogger('io.zenoh.python.api')
+            self.logger = logging.getLogger('zenoh.python.api')
 
             self.logger.setLevel(level)
             formatter = logging.Formatter(log_format)

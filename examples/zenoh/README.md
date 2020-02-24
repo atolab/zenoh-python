@@ -20,7 +20,7 @@
 ## Prerequisites
 
    The [Zenoh](https://zenoh.io) C client library and Python API must be installed on your host.
-   See installation instructions on https://zenoh.io or clone, build and install it yourself from https://github.com/atolab/zenoh-c and https://github.com/atolab/zenoh-python.
+   See installation instructions on https://zenoh.io or clone, build and install it yourself from https://github.com/eclipse-zenoh/zenoh-c and https://github.com/eclipse-zenoh/zenoh-python.
 
 ## Start instructions
    
